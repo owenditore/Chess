@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ChessClassLibrary/ChessClassLibrary.csproj" />
+  <Project Path="ChessUI/ChessUI.csproj" />
+</Solution>
