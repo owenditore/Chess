@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ChessUI;
 
 namespace ChessClassLibrary
 {
@@ -26,12 +27,8 @@ namespace ChessClassLibrary
 
         public static void RefreshDisplay()
         {
-            foreach(Piece piece in pieces)
-            {
-                //Read Position
-                //Convert from numbers to place on the board
-                //Display the icon of the Piece there
-            }
+            MainWindow.RefreshDisplay(pieces);
         }
+
     }
 }

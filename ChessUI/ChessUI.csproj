@@ -28,6 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChessClassLibrary\ChessClassLibrary.csproj" />
+    <ProjectReference Include="..\ChessMain\ChessMain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\BishopB.png" />
     <Resource Include="Assets\BishopW.png" />
     <Resource Include="Assets\Board.png" />
