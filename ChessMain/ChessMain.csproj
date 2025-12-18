@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ChessClassLibrary\ChessClassLibrary.csproj" />
+    <ProjectReference Include="..\ChessUI\ChessUI.csproj" />
+  </ItemGroup>
+
+
 </Project>

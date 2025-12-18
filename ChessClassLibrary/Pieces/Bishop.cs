@@ -8,7 +8,7 @@ namespace ChessClassLibrary
     {
 
         //Constructor
-        public Bishop(string color, int row, int col) : base(color, row, col)
+        public Bishop(string name, string color, int row, int col) : base(name, color, row, col)
         {
 
         }

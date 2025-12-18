@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="838" Width="814"
+        Title="MainWindow" Width="814" Height="838"
         Icon="/Assets/icon.ico">
-    
+
     <Grid Height="800px" Width="800px">
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
@@ -29,7 +29,6 @@
             <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="100"/>
         </Grid.ColumnDefinitions>
-
         
         <Button DataContext ="00" Background="Transparent" Grid.Row="0" Grid.Column="0" Click="CellButton_Click"/>
         <Button DataContext ="10" Background="Transparent" Grid.Row="1" Grid.Column="0" Click="CellButton_Click"/>

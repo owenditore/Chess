@@ -8,7 +8,7 @@ namespace ChessClassLibrary
     {
 
         //Constructor
-        public Knight(string color, int row, int col) : base(color, row, col)
+        public Knight(string name, string color, int row, int col) : base(name, color, row, col)
         {
 
         }
