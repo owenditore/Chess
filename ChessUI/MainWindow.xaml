@@ -5,105 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChessUI"
         mc:Ignorable="d"
-        Title="MainWindow" Width="814" Height="838"
-        Icon="/Assets/icon.ico">
+        Title="Chess" Width="600" SizeToContent="Height"
+        Icon="/Assets/icon.ico"
+        WindowStartupLocation="CenterScreen"
+        Background="#101010">
+    <Viewbox>
+        <Grid x:Name="BoardGrid"
+              Width="600"
+              Height="600"
+              MouseDown="BoardGrid_MouseDown">
+            <Grid.Background>
+                <ImageBrush ImageSource="Assets/Board.png"/>
+            </Grid.Background>
 
-    <Grid Height="800px" Width="800px">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="100"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-            <ColumnDefinition Width="100"/>
-        </Grid.ColumnDefinitions>
-        
-        <Button DataContext ="00" Background="Transparent" Grid.Row="0" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="10" Background="Transparent" Grid.Row="1" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="20" Background="Transparent" Grid.Row="2" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="30" Background="Transparent" Grid.Row="3" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="40" Background="Transparent" Grid.Row="4" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="50" Background="Transparent" Grid.Row="5" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="60" Background="Transparent" Grid.Row="6" Grid.Column="0" Click="CellButton_Click"/>
-        <Button DataContext ="70" Background="Transparent" Grid.Row="7" Grid.Column="0" Click="CellButton_Click"/>
+            
+            
+            <UniformGrid x:Name="PieceGrid"
+                         Rows="8"
+                         Columns="8">
+            </UniformGrid>
 
-        <Button DataContext ="01" Background="Transparent" Grid.Row="0" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="11" Background="Transparent" Grid.Row="1" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="21" Background="Transparent" Grid.Row="2" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="31" Background="Transparent" Grid.Row="3" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="41" Background="Transparent" Grid.Row="4" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="51" Background="Transparent" Grid.Row="5" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="61" Background="Transparent" Grid.Row="6" Grid.Column="1" Click="CellButton_Click"/>
-        <Button DataContext ="71" Background="Transparent" Grid.Row="7" Grid.Column="1" Click="CellButton_Click"/>
-
-        <Button DataContext ="02" Background="Transparent" Grid.Row="0" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="12" Background="Transparent" Grid.Row="1" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="22" Background="Transparent" Grid.Row="2" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="32" Background="Transparent" Grid.Row="3" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="42" Background="Transparent" Grid.Row="4" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="52" Background="Transparent" Grid.Row="5" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="62" Background="Transparent" Grid.Row="6" Grid.Column="2" Click="CellButton_Click"/>
-        <Button DataContext ="72" Background="Transparent" Grid.Row="7" Grid.Column="2" Click="CellButton_Click"/>
-
-        <Button DataContext ="03" Background="Transparent" Grid.Row="0" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="13" Background="Transparent" Grid.Row="1" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="23" Background="Transparent" Grid.Row="2" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="33" Background="Transparent" Grid.Row="3" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="43" Background="Transparent" Grid.Row="4" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="53" Background="Transparent" Grid.Row="5" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="63" Background="Transparent" Grid.Row="6" Grid.Column="3" Click="CellButton_Click"/>
-        <Button DataContext ="73" Background="Transparent" Grid.Row="7" Grid.Column="3" Click="CellButton_Click"/>
-
-        <Button DataContext ="04" Background="Transparent" Grid.Row="0" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="14" Background="Transparent" Grid.Row="1" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="24" Background="Transparent" Grid.Row="2" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="34" Background="Transparent" Grid.Row="3" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="44" Background="Transparent" Grid.Row="4" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="54" Background="Transparent" Grid.Row="5" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="64" Background="Transparent" Grid.Row="6" Grid.Column="4" Click="CellButton_Click"/>
-        <Button DataContext ="74" Background="Transparent" Grid.Row="7" Grid.Column="4" Click="CellButton_Click"/>
-
-        <Button DataContext ="05" Background="Transparent" Grid.Row="0" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="15" Background="Transparent" Grid.Row="1" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="25" Background="Transparent" Grid.Row="2" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="35" Background="Transparent" Grid.Row="3" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="45" Background="Transparent" Grid.Row="4" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="55" Background="Transparent" Grid.Row="5" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="65" Background="Transparent" Grid.Row="6" Grid.Column="5" Click="CellButton_Click"/>
-        <Button DataContext ="75" Background="Transparent" Grid.Row="7" Grid.Column="5" Click="CellButton_Click"/>
-
-        <Button DataContext ="06" Background="Transparent" Grid.Row="0" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="16" Background="Transparent" Grid.Row="1" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="26" Background="Transparent" Grid.Row="2" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="36" Background="Transparent" Grid.Row="3" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="46" Background="Transparent" Grid.Row="4" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="56" Background="Transparent" Grid.Row="5" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="66" Background="Transparent" Grid.Row="6" Grid.Column="6" Click="CellButton_Click"/>
-        <Button DataContext ="76" Background="Transparent" Grid.Row="7" Grid.Column="6" Click="CellButton_Click"/>
-
-        <Button DataContext ="07" Background="Transparent" Grid.Row="0" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="17" Background="Transparent" Grid.Row="1" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="27" Background="Transparent" Grid.Row="2" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="37" Background="Transparent" Grid.Row="3" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="47" Background="Transparent" Grid.Row="4" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="57" Background="Transparent" Grid.Row="5" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="67" Background="Transparent" Grid.Row="6" Grid.Column="7" Click="CellButton_Click"/>
-        <Button DataContext ="77" Background="Transparent" Grid.Row="7" Grid.Column="7" Click="CellButton_Click"/>
-
-        <Grid.Background>
-            <ImageBrush ImageSource="/Assets/Board.png"></ImageBrush>
-        </Grid.Background>
-    </Grid>
+        </Grid>
+    </Viewbox>
 </Window>

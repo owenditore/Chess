@@ -15,7 +15,7 @@ namespace ChessClassLibrary
 
         //Methods
 
-        protected override bool CheckValidMove(Position newPosition)
+        protected override bool CheckValidMove(Board board, Position newPosition)
         {
             return true;
         }

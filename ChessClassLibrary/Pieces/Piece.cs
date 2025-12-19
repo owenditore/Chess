@@ -8,7 +8,8 @@ namespace ChessClassLibrary
     {
         public bool HasMoved { get; set; } = false;
         public string Color { get; protected set; }
-        public Position Position { get; protected set; }
+        public Position Position { get; set; }
+
 
         public string Name { get; protected set; }
 
@@ -23,19 +24,18 @@ namespace ChessClassLibrary
 
         //Method
 
-        public void Move(Board board,Position newPosition)
+        public void Move(Board board, Position newPosition)
         {
-            if(CheckValidMove(board,newPosition))
+            if(CheckValidMove(board,newPosition) == true)
             {
+                if(board.CheckForPiece(newPosition) != "none")
+                {
+                    board.Pieces.Remove(board.WhatPieceIsHere(newPosition));
+                }
                 Position = newPosition;
+                HasMoved = true;
+                board.NextTurn();
             }
-            else
-            {
-                Console.WriteLine("Invalid Move.");
-            }
-            HasMoved = true;
-            Board.RefreshDisplay();
-
         }
 
         protected virtual bool CheckValidMove(Board board, Position newPosition)

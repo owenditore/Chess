@@ -10,21 +10,21 @@ namespace ChessClassLibrary
         public List<Piece> Pieces { get; set; } = new List<Piece>();
         public bool Check { get; set; } = false;
         public bool CheckMate { get; set; } = false;
+
+        public string Turn { get; set; } = "white";
         
 
         public void TestSetup()
         {
-            Pawn testPawn = new Pawn("whitePawnE","white", 4, 4);
-            Pieces.Add(testPawn);
+            Pawn testPawn1 = new Pawn("pawn","white", 3, 3);
+            Bishop testBishop1 = new Bishop("bishop", "white", 5, 5);
+            Pieces.Add(testPawn1);
+            Pieces.Add(testBishop1);
         }
-        public void SetupGame()
+
+        public void AddPiece(Piece piece)
         {
-            Rook whiteRookA = new Rook("whiteRookA","white", 7, 0);
-            Pieces.Add(whiteRookA);
-            Knight whiteKnightB = new Knight("whiteKinghtB","white", 7, 1);
-            Pieces.Add(whiteKnightB);
-            King whiteKing = new King("whiteKing","white", 7, 4);
-            //Finish filling this up.
+            Pieces.Add(piece); 
         }
 
         public Piece WhatPieceIsHere(Position newPosition)
@@ -36,24 +36,42 @@ namespace ChessClassLibrary
                     return piece;
                 }
             }
-            return;
+            return null;
         }
 
-        public string CheckForPiece(Position newPosition)
+        public string CheckForPiece(Position position)
         {
             foreach (Piece piece in Pieces)
             {
-                if (piece.Position == newPosition)
+                int posRow = position.Row;
+                int posCol = position.Column;
+                int pieceRow = piece.Position.Row;
+                int pieceCol = piece.Position.Column;
+
+                if (pieceRow == posRow && pieceCol == posCol)
                 {
                     return piece.Color;
                 }
+
             }
             return "none";
         }
 
-        public static void RefreshDisplay()
+        public void Capture(Position position)
         {
-            //MainWindow.RefreshDisplay(pieces);
+            int posRow = position.Row;
+            int posCol = position.Column;
+
+            Pieces.RemoveAll(piece => piece.Position.Row == posRow && piece.Position.Column == posCol);
+
+        }
+        
+        public void NextTurn()
+        {
+            if (Turn == "white")
+                Turn = "black";
+            else
+                Turn = "white";
         }
 
     }

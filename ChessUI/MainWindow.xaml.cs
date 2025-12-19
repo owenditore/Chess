@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using ChessClassLibrary;
+using System.Buffers.Text;
+using System.Drawing;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,57 +11,120 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ChessClassLibrary;
 
 namespace ChessUI
 {
 
     public partial class MainWindow : Window
     {
-        Position ReferencePosition { get; } = new Position(-1, -1);
-        Position LastClickPosition { get; set; }
+
+        private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
+        private Position selectedPosition = null;
+        private Piece selectedPiece = null;
+        Board board = new Board();
+
+
+
         public MainWindow()
         {
             InitializeComponent();
-            Board board = new Board();
+            InitializeBoard();
+
             board.TestSetup();
-            DisplayPieces(board);
-            do
-            {
-                do
-                {
-                    if (LastClickPosition != ReferencePosition)
-                    {
-
-                    }
-
-                } while (LastClickPosition == ReferencePosition);
-
-                Piece returnedPiece = board.WhatPieceIsHere(newPosition);
-                //Remove piece if there was a capture
-                //check Check/CheckMate
-                //RefreshDisplay
-            } while (board.CheckMate != true);
+            DrawBoard(board);
 
         }
 
-        private void CellButton_Click(object sender, RoutedEventArgs e)
+
+        private void InitializeBoard()
         {
-            string gridData = (string)((FrameworkElement)sender).DataContext;
-            char rowC = (char)gridData[0];
-            char colC = (char)gridData[1];
-            Position position = new Position((int)rowC,(int)colC);
-            LastClickPosition = position;
+            for (int r = 0; r < 8; r++)
+            {
+                for (int c  = 0; c < 8; c++)
+                {
+                    System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                    pieceImages[r, c] = image;
+                    PieceGrid.Children.Add(image);
 
-            //return position;
+                }
+            }
         }
 
-        private void DisplayPieces(Board board)
+        private void DrawBoard(Board board)
+        {
+            for (int r = 0; r< 8 ; r++)
+            {
+                for (int c = 0; c < 8 ; c++)
+                {
+                    pieceImages[r, c].Source = null;
+                }
+            }
+            foreach (var piece in board.Pieces)
+            {
+                int r = piece.Position.Row;
+                int c = piece.Position.Column;
+
+                pieceImages[r, c].Source = Images.GetImage(piece);
+            }
+        }
+
+        private void BoardGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Windows.Point point = e.GetPosition(BoardGrid);
+            Position pos = ToSquarePosition(point);
+
+            if (selectedPosition == null)
+            {
+                OnFromPositionSelected(pos);
+            }
+            else
+            {
+                OnToPositionSelected(pos);
+            }
+        }
+
+        private void OnFromPositionSelected(Position pos)
         {
             foreach (var piece in board.Pieces)
             {
-                //Put the corresponding image at the corresponding position on grid.
+
+                int posRow = pos.Row;
+                int posCol = pos.Column;
+                int pieceRow = piece.Position.Row;
+                int pieceCol = piece.Position.Column;
+
+                if (pieceRow == posRow && pieceCol == posCol)
+                {
+                    selectedPiece = piece;
+                    selectedPosition = pos;
+                }
+                
             }
+
         }
+
+        private void OnToPositionSelected(Position pos)
+        {
+            if (selectedPiece != null)
+            {
+                selectedPiece.Move(board, pos);
+                DrawBoard(board);
+            }
+
+            selectedPosition = null;
+            selectedPiece = null;
+        }
+
+
+        private Position ToSquarePosition(System.Windows.Point point)
+        {
+            double squareSize = BoardGrid.ActualWidth / 8;
+            int row = (int)(point.Y / squareSize);
+            int col = (int)(point.X / squareSize);
+            return new Position(row, col);
+
+        }
+        
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ChessClassLibrary
 {
@@ -34,14 +35,23 @@ namespace ChessClassLibrary
                     {
                         intermediaryPosition.Row += 1;
                         if (board.CheckForPiece(intermediaryPosition) == "none")
+                        {
+                            intermediaryPosition.Row -= 1;
                             return true;
+                        }
                         else
+                        {
+                            intermediaryPosition.Row -= 1;
                             return false;
+                        }
                     }
 
                     //Capture
                     else if (verticalMove == -1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "black")
+                    {
+                        board.Capture(newPosition);
                         return true;
+                    }
 
                     else
                         return false;
@@ -65,7 +75,10 @@ namespace ChessClassLibrary
 
                     //Capture
                     else if (verticalMove == 1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "white")
+                    {
+                        board.Capture(newPosition);
                         return true;
+                    }
 
                     //En Passant?
 

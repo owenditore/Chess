@@ -15,9 +15,55 @@ namespace ChessClassLibrary
 
         //Methods
 
-        protected override bool CheckValidMove(Position newPosition)
+        protected override bool CheckValidMove(Board board, Position newPosition)
         {
-            return true;
+            Position intermediaryPosition = new Position(-1, -1);
+            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
+            int verticalMove = newPosition.Row - Position.Row;
+            int horizontalMove = newPosition.Column - Position.Column;
+
+            if (stateOfNewPosition == Color)
+            {
+                return false;
+            }
+            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0)
+            {
+                if (Math.Abs(verticalMove) == 1)
+                    return true;
+                do
+                {
+                    verticalMove = MoveCloserToZero(verticalMove);
+                    horizontalMove = MoveCloserToZero(horizontalMove);
+                    intermediaryPosition.Row = verticalMove + Position.Row;
+                    intermediaryPosition.Column = horizontalMove + Position.Column;
+                    string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
+                    if (stateOfIntermediaryPosition != "none")
+                    {
+                        return false;
+                    }
+
+                } while (Math.Abs(verticalMove) != 1);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private int MoveCloserToZero(int number)
+        {
+            if (number > 0)
+            {
+                return number - 1;
+            }
+            else if (number < 0)
+            {
+                return number + 1;
+            }
+            else
+                return number;
         }
 
     }
