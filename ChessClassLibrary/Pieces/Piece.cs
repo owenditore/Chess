@@ -87,6 +87,9 @@ namespace ChessClassLibrary
 
                     Position = newPosition;
                     HasMoved = true;
+
+
+                    board.CheckForPromotion();
                     board.NextTurn();
                 }
             }

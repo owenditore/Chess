@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Transactions;
 
 namespace ChessClassLibrary
 {
     public class Board
     {
         public List<Piece> Pieces { get; set; } = new List<Piece>();
+
+        public List<Piece> PromotionList { get; set; } = new List<Piece>();
 
         public List<Move> Moves { get; set; } = new List<Move>();
 
@@ -17,6 +20,8 @@ namespace ChessClassLibrary
         public string Turn { get; set; } = "white";
 
         public List<Position> Positions { get; set; } = new List<Position>();
+
+        public bool Promotion { get; set; } = false;
 
         public Board()
         {
@@ -28,7 +33,32 @@ namespace ChessClassLibrary
                 }
             }
         }
-        
+
+        public void CreatePromotionList()
+        {
+            Queen whitePromoteQueen = new Queen("queen", "white", 2, 7);
+            Rook whitePromoteRook = new Rook("rook", "white", 3, 7);
+            Bishop whitePromoteBishop = new Bishop("bishop", "white", 4, 7);
+            Knight whitePromoteKnight = new Knight("knight", "white", 5, 7);
+
+            Queen blackPromoteQueen = new Queen("queen", "black", 2, 0);
+            Rook blackPromoteRook = new Rook("rook", "black", 3, 0);
+            Bishop blackPromoteBishop = new Bishop("bishop", "black", 4, 0);
+            Knight blackPromoteKnight = new Knight("knight", "black", 5, 0);
+
+            PromotionList.Add(whitePromoteQueen);
+            PromotionList.Add(whitePromoteRook);
+            PromotionList.Add(whitePromoteBishop);
+            PromotionList.Add(whitePromoteKnight);
+
+            PromotionList.Add(blackPromoteQueen);
+            PromotionList.Add(blackPromoteRook);
+            PromotionList.Add(blackPromoteBishop);
+            PromotionList.Add(blackPromoteKnight);
+
+        }
+
+
         public void TestCastle()
         {
             Rook whiteRookA = new Rook("rook", "white", 7, 0);
@@ -42,6 +72,7 @@ namespace ChessClassLibrary
             Pieces.Add(whiteKing);
             Pieces.Add(blackRook);
             Pieces.Add(blackKing);
+            CreatePromotionList();
         }
 
         public void TestSetup()
@@ -62,6 +93,7 @@ namespace ChessClassLibrary
             Pieces.Add(testKnight1);
             Pieces.Add(testKing1);
             Pieces.Add(testKing2);
+            CreatePromotionList();
         }
 
         public void SetupGame()
@@ -141,12 +173,8 @@ namespace ChessClassLibrary
             Pieces.Add(blackBishopF);
             Pieces.Add(blackQueen);
             Pieces.Add(blackKing);
+            CreatePromotionList();
 
-        }
-
-        public void AddPiece(Piece piece)
-        {
-            Pieces.Add(piece); 
         }
 
         public Piece WhatPieceIsHere(Position newPosition)
@@ -187,6 +215,11 @@ namespace ChessClassLibrary
 
             Pieces.RemoveAll(piece => piece.Position.Row == posRow && piece.Position.Column == posCol);
 
+        }
+
+        public void Capture(int row, int column)
+        {
+            Pieces.RemoveAll(piece => piece.Position.Row == row && piece.Position.Column == column);
         }
         
         public void NextTurn()
@@ -230,6 +263,25 @@ namespace ChessClassLibrary
 
             return true;
         }
+
+        public void CheckForPromotion()
+        {
+            foreach(Piece piece in Pieces)
+            {
+                if (piece.Color == Turn && piece.Name == "pawn")
+                {
+                    if (piece.Color == "white" && piece.Position.Row == 0)
+                    {
+                        Promotion = true;
+                    }
+                    else if (piece.Color == "black" && piece.Position.Row == 7)
+                    {
+                        Promotion = true;
+                    }
+                }
+            }
+        }
+
 
 
 
