@@ -8,6 +8,9 @@ namespace ChessClassLibrary
     public class Board
     {
         public List<Piece> Pieces { get; set; } = new List<Piece>();
+
+        public List<Move> Moves { get; set; } = new List<Move>();
+
         public bool Check { get; set; } = false;
         public bool CheckMate { get; set; } = false;
 

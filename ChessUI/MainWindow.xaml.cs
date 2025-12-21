@@ -13,6 +13,35 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
+
+//TODO LIST
+//Promotion
+//En Passant
+//Drawing Rules
+//Castling Through Check/While Checked
+
+//Potential Game Experience Features
+//Highlight your piece when it's clicked
+//Highlight last move made in the game
+//Show Valid Moves for the piece
+//Show captures in a different color
+
+//More Involved Features for a full application
+//Main Menu before you start a game
+//Make the board a subsection of a larger screen, include space for clocks or taken pieces
+//Have clocks and different time controls
+//Have different visual themes that can be changed
+//Play as guests or as users, users would have game history and a login user/password to play as them, could have an elo system as well and play rated or unrated games
+//Game history and ability to review past games
+
+//Potential Bot features
+//Make my own, would be very rudimentary
+//Save the game in FEN or PGN format, pass to either local engine or web based engine to get back evaluation and best moves
+//Evaluation bar either by my bot or by an engine on screen or in replay/analysis
+
+
+
 namespace ChessUI
 {
 

@@ -43,10 +43,6 @@ namespace ChessClassLibrary
             {
                 if(CheckIfMovePutsSelfInCheck(board,newPosition) == false)
                 {
-                    if (board.CheckForPiece(newPosition) != "none")
-                    {
-                        board.Capture(newPosition);
-                    }
 
                     if (Name == "king")
                     {
@@ -72,6 +68,21 @@ namespace ChessClassLibrary
                                 }
                             }
                         }
+                    }
+
+                    int numberOfMoves = board.Moves.Count;
+                    int nextMove = numberOfMoves + 1;
+                    string nextMoveString = nextMove.ToString();
+
+                    if (board.CheckForPiece(newPosition) != "none")
+                    {
+                        Piece capturedPiece = board.WhatPieceIsHere(newPosition);
+                        board.Moves.Add(new ChessClassLibrary.Move(nextMoveString, this, capturedPiece , Position.Row, Position.Column, newPosition.Row, newPosition.Column));
+                        board.Capture(newPosition);
+                    }
+                    else
+                    {
+                        board.Moves.Add(new ChessClassLibrary.Move(nextMoveString, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column));
                     }
 
                     Position = newPosition;
