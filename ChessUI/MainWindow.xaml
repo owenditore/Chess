@@ -18,13 +18,95 @@
                 <ImageBrush ImageSource="Assets/Board.png"/>
             </Grid.Background>
 
-            
-            
+
+
             <UniformGrid x:Name="PieceGrid"
                          Rows="8"
                          Columns="8">
+<!--
+                <Border x:Name="S00" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S01" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S02" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S03" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S04" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S05" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S06" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S07" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S10" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S11" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S12" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S13" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S14" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S15" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S16" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S17" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S20" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S21" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S22" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S23" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S24" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S25" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S26" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S27" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S30" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S31" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S32" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S33" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S34" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S35" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S36" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S37" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S40" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S41" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S42" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S43" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S44" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S45" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S46" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S47" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S50" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S51" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S52" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S53" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S54" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S55" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S56" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S57" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S60" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S61" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S62" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S63" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S64" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S65" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S66" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S67" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+
+                <Border x:Name="S70" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S71" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S72" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S73" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S74" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S75" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S76" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+                <Border x:Name="S77" BorderBrush="Yellow" BorderThickness="5" Visibility="Hidden"/>
+-->
+
+
             </UniformGrid>
 
+            <StackPanel Grid.Row="4" Grid.Column="4">
+                <TextBlock x:Name="Checkmate" Text="Checkmate!" Visibility="Hidden"/>
+            </StackPanel>
+
         </Grid>
+
     </Viewbox>
+    
+
 </Window>

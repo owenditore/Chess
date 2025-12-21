@@ -16,9 +16,9 @@ namespace ChessClassLibrary
 
         //Methods
 
-        protected override bool CheckValidMove(Board board, Position newPosition)
+        public override bool CheckValidMove(Board board, Position newPosition)
         {
-            Position intermediaryPosition = newPosition;
+            Position intermediaryPosition = new Position(-1, -1);
             string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
             int verticalMove = newPosition.Row - Position.Row;
             int horizontalMove = newPosition.Column - Position.Column;
@@ -33,15 +33,14 @@ namespace ChessClassLibrary
                     //First Move 
                     else if (verticalMove == -2 && horizontalMove == 0 && stateOfNewPosition == "none" && HasMoved == false)
                     {
-                        intermediaryPosition.Row += 1;
+                        intermediaryPosition.Row = Position.Row - 1;
+                        intermediaryPosition.Column = Position.Column;
                         if (board.CheckForPiece(intermediaryPosition) == "none")
                         {
-                            intermediaryPosition.Row -= 1;
                             return true;
                         }
                         else
                         {
-                            intermediaryPosition.Row -= 1;
                             return false;
                         }
                     }
@@ -49,7 +48,6 @@ namespace ChessClassLibrary
                     //Capture
                     else if (verticalMove == -1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "black")
                     {
-                        board.Capture(newPosition);
                         return true;
                     }
 
@@ -66,7 +64,8 @@ namespace ChessClassLibrary
                     //First Move
                     else if (verticalMove == 2 && horizontalMove == 0 && stateOfNewPosition == "none" && HasMoved == false)
                     {
-                        intermediaryPosition.Row += 1;
+                        intermediaryPosition.Row = Position.Row + 1;
+                        intermediaryPosition.Column = Position.Column;
                         if (board.CheckForPiece(intermediaryPosition) == "none")
                             return true;
                         else
@@ -76,7 +75,6 @@ namespace ChessClassLibrary
                     //Capture
                     else if (verticalMove == 1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "white")
                     {
-                        board.Capture(newPosition);
                         return true;
                     }
 

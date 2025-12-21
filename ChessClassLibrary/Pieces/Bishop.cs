@@ -15,21 +15,27 @@ namespace ChessClassLibrary
 
         //Methods
 
-        protected override bool CheckValidMove(Board board, Position newPosition)
+        public override bool CheckValidMove(Board board, Position newPosition)
         {
             Position intermediaryPosition = new Position(-1, -1);
             string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
             int verticalMove = newPosition.Row - Position.Row;
             int horizontalMove = newPosition.Column - Position.Column;
 
+            //No friendly piece at new position
             if (stateOfNewPosition == Color)
             {
                 return false;
             }
+
+            //Moves diagonally
             else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0)
             {
                 if (Math.Abs(verticalMove) == 1)
+                {
+
                     return true;
+                }
                 do
                 {
                     verticalMove = MoveCloserToZero(verticalMove);
@@ -44,26 +50,14 @@ namespace ChessClassLibrary
 
                 } while (Math.Abs(verticalMove) != 1);
 
+
                 return true;
             }
+
             else
             {
                 return false;
             }
-        }
-
-        private int MoveCloserToZero(int number)
-        {
-            if (number > 0)
-            {
-                return number - 1;
-            }
-            else if (number < 0)
-            {
-                return number + 1;
-            }
-            else
-                return number;
         }
 
     }
