@@ -77,8 +77,8 @@ namespace ChessClassLibrary
 
         public void TestSetup()
         {
-            Pawn testPawn1 = new Pawn("pawn","white", 3, 3);
-            Pawn testPawn2 = new Pawn("pawn", "black", 6, 6);
+            Pawn testPawn1 = new Pawn("pawn","white", 6, 3);
+            Pawn testPawn2 = new Pawn("pawn", "black", 1, 2);
             Bishop testBishop1 = new Bishop("bishop", "white", 5, 5);
             Rook testRook1 = new Rook("rook", "white", 1, 1);
             Queen testQueen1 = new Queen("queen", "white", 0, 0);
@@ -87,10 +87,7 @@ namespace ChessClassLibrary
             King testKing2 = new King("king", "black", 5, 7);
             Pieces.Add(testPawn1);
             Pieces.Add(testPawn2);
-            Pieces.Add(testBishop1);
-            Pieces.Add(testRook1);
-            Pieces.Add(testQueen1);
-            Pieces.Add(testKnight1);
+
             Pieces.Add(testKing1);
             Pieces.Add(testKing2);
             CreatePromotionList();
@@ -189,6 +186,25 @@ namespace ChessClassLibrary
             return null;
         }
 
+        public string NameOfPiece(Position position)
+        {
+            foreach (Piece piece in Pieces)
+            {
+                int posRow = position.Row;
+                int posCol = position.Column;
+                int pieceRow = piece.Position.Row;
+                int pieceCol = piece.Position.Column;
+
+                if (pieceRow == posRow && pieceCol == posCol)
+                {
+                    if (piece.Covered == false)
+                        return piece.Name;
+                }
+
+            }
+            return null;
+        }
+
         public string CheckForPiece(Position position)
         {
             foreach (Piece piece in Pieces)
@@ -221,6 +237,20 @@ namespace ChessClassLibrary
         {
             Pieces.RemoveAll(piece => piece.Position.Row == row && piece.Position.Column == column);
         }
+
+        public Move ReturnLastMove(Board board)
+        {
+            int numberOfMoves = board.Moves.Count();
+            foreach (Move move in board.Moves)
+            {
+                if (move.Number == numberOfMoves)
+                {
+                    return move;
+                }
+            }
+            return null;
+        }
+
         
         public void NextTurn()
         {

@@ -51,10 +51,33 @@ namespace ChessClassLibrary
                         return true;
                     }
 
-                    else
-                        return false;
-
                     //En Passant ??
+
+                    else if (verticalMove == -1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "none")
+                    {
+                        int enPassantRow = newPosition.Row + 1;
+                        int enPassantCol = newPosition.Column;
+                        int enPassantStartingRow = enPassantRow - 2;
+                        int enPassantStartingCol = enPassantCol;
+
+                        Position enPassantPosition = new Position(enPassantRow, enPassantCol);
+                        if (board.CheckForPiece(enPassantPosition) == "black"  && board.NameOfPiece(enPassantPosition) == "pawn")
+                        {
+                            Move lastMove = board.ReturnLastMove(board);
+
+                            if (lastMove.Piece.Name == "pawn" && lastMove.Piece.Color == "black" && lastMove.EndingPosition.Row == enPassantRow && lastMove.EndingPosition.Column == enPassantCol)
+                            {
+                                if (lastMove.StartingPosition.Row == enPassantStartingRow && lastMove.StartingPosition.Column == enPassantStartingCol)
+                                {
+                                    return true;
+                                }
+                            }
+
+                        }
+                    }
+
+                    return false;
+
 
                 case "black":
                     //Normal Move
@@ -80,8 +103,31 @@ namespace ChessClassLibrary
 
                     //En Passant?
 
-                    else
-                        return false;
+                    else if (verticalMove == 1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "none")
+                    {
+                        int enPassantRow = newPosition.Row - 1;
+                        int enPassantCol = newPosition.Column;
+                        int enPassantStartingRow = enPassantRow + 2;
+                        int enPassantStartingCol = enPassantCol;
+
+                        Position enPassantPosition = new Position(enPassantRow, enPassantCol);
+                        if (board.CheckForPiece(enPassantPosition) == "white" && board.NameOfPiece(enPassantPosition) == "pawn")
+                        {
+                            Move lastMove = board.ReturnLastMove(board);
+
+                            if (lastMove.Piece.Name == "pawn" && lastMove.Piece.Color == "white" && lastMove.EndingPosition.Row == enPassantRow && lastMove.EndingPosition.Column == enPassantCol)
+                            {
+                                if (lastMove.StartingPosition.Row == enPassantStartingRow && lastMove.StartingPosition.Column == enPassantStartingCol)
+                                {
+                                    return true;
+                                }
+                            }
+
+                        }
+                    }
+
+
+                    return false;
 
             }
             return false;

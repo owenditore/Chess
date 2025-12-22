@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -44,6 +45,7 @@ namespace ChessClassLibrary
                 if(CheckIfMovePutsSelfInCheck(board,newPosition) == false)
                 {
 
+                    //Castling
                     if (Name == "king")
                     {
                         int horizontalMove = newPosition.Column - Position.Column;
@@ -72,17 +74,56 @@ namespace ChessClassLibrary
 
                     int numberOfMoves = board.Moves.Count;
                     int nextMove = numberOfMoves + 1;
-                    string nextMoveString = nextMove.ToString();
 
+                    int enPassantCaptureRow = -1;
+                    int enPassantCaptureCol = -1;
+                    string enPassantCaptureColor = "none";
+                    bool enPassantCapture = false;
+
+                    //Check For En Passant
+
+                    if (Name == "pawn" && newPosition.Column != Position.Column && board.CheckForPiece(newPosition) == "none")
+                    {
+                        enPassantCapture = true;
+                        enPassantCaptureRow = newPosition.Row;
+                        enPassantCaptureCol = newPosition.Column;
+                        enPassantCaptureColor = Color;
+                    }
+
+                    //If you capture normally
                     if (board.CheckForPiece(newPosition) != "none")
                     {
                         Piece capturedPiece = board.WhatPieceIsHere(newPosition);
-                        board.Moves.Add(new ChessClassLibrary.Move(nextMoveString, this, capturedPiece , Position.Row, Position.Column, newPosition.Row, newPosition.Column));
+                        board.Moves.Add(new ChessClassLibrary.Move(nextMove, this, capturedPiece , Position.Row, Position.Column, newPosition.Row, newPosition.Column));
                         board.Capture(newPosition);
                     }
+                    //else if you capture using En Passant
+                    else if (enPassantCapture == true)
+                    {
+                        Position enPassantCapturedPosition = new Position(-1,-1);
+                        switch (enPassantCaptureColor)
+                        {
+                            case "white":
+                                enPassantCapturedPosition.Row = enPassantCaptureRow + 1;
+                                enPassantCapturedPosition.Column = enPassantCaptureCol;
+                                Piece capturedPieceW = board.WhatPieceIsHere(newPosition);
+                                board.Moves.Add(new ChessClassLibrary.Move(nextMove, this, capturedPieceW, Position.Row, Position.Column, newPosition.Row, newPosition.Column));
+                                board.Capture(enPassantCapturedPosition);
+                                break;
+
+                            case "black":
+                                enPassantCapturedPosition.Row = enPassantCaptureRow - 1;
+                                enPassantCapturedPosition.Column = enPassantCaptureCol;
+                                Piece capturedPieceB = board.WhatPieceIsHere(newPosition);
+                                board.Moves.Add(new ChessClassLibrary.Move(nextMove, this, capturedPieceB, Position.Row, Position.Column, newPosition.Row, newPosition.Column));
+                                board.Capture(enPassantCapturedPosition);
+                                break;
+                        }
+                    }
+                    //else you don't capture
                     else
                     {
-                        board.Moves.Add(new ChessClassLibrary.Move(nextMoveString, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column));
+                        board.Moves.Add(new ChessClassLibrary.Move(nextMove, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column));
                     }
 
                     Position = newPosition;

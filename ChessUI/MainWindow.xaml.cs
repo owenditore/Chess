@@ -16,7 +16,6 @@ using System.Windows.Shapes;
 
 
 //TODO LIST
-//En Passant
 //Drawing Rules
 //Castling Through Check/While Checked
 

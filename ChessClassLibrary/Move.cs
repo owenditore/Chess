@@ -17,11 +17,11 @@ namespace ChessClassLibrary
 
         public string Notation { get; set; }
 
-        public string Number {  get; set; }
+        public int Number {  get; set; } = 0;
 
 
         //Constructors
-        public Move(string number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public Move(int number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
         {
             this.Number = number;
             this.StartingPosition = new Position(startRow, startColumn);
@@ -39,7 +39,7 @@ namespace ChessClassLibrary
             GenerateNotation();
         }
 
-        public Move(string number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public Move(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
         {
             this.Number = number;
             this.StartingPosition = new Position(startRow, startColumn);
