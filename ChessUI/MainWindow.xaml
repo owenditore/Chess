@@ -102,6 +102,7 @@
 
             <StackPanel Grid.Row="4" Grid.Column="4">
                 <TextBlock x:Name="Checkmate" Text="Checkmate!" Visibility="Hidden"/>
+                <TextBlock x:Name="Draw" Text="Draw" Visibility="Hidden"/>
             </StackPanel>
 
         </Grid>

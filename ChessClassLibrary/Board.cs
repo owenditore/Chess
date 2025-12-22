@@ -272,7 +272,86 @@ namespace ChessClassLibrary
             return null;
         }
 
-        public bool CheckForMate(Board board)
+
+        public string CheckForMateOrDraw(Board board)
+        {
+            string checkForMate = CheckForCheckOrStaleMate(board);
+            if (checkForMate == "checkmate") return checkForMate;
+
+            string checkForStaleMate = CheckForCheckOrStaleMate(board);
+            if (checkForStaleMate == "stalemate") return "draw";
+
+            string checkForInsufficientMaterial = CheckForInsufficientMaterial(board);
+            if (checkForInsufficientMaterial == "draw") return "draw";
+
+            //string checkForThreeRepitition = CheckForThreeRepitition(board);
+            //if (checkForThreeRepitition == "threerepitition") return checkForThreeRepitition;
+
+            //string checkForFiftyMoves = CheckForFiftyMoves(board);
+            //if (checkForFiftyMoves == "fiftymoves") return checkForFiftyMoves;
+
+            return "";
+        }
+
+        public string CheckForInsufficientMaterial(Board board)
+        {
+            int numberOfQueens = 0;
+            int numberOfRooks = 0;
+            int numberOfPawns = 0;
+            int numberOfWhiteBishops = 0;
+            int numberOfBlackBishops = 0;
+            int numberOfWhiteKnights = 0;
+            int numberOfBlackKnights = 0;
+
+            foreach (Piece piece in board.Pieces)
+            {
+                switch (piece.Name)
+                {
+                    case "queen":
+                        numberOfQueens++;
+                        break;
+
+                    case "rook":
+                        numberOfRooks++;
+                        break;
+
+                    case "pawn":
+                        numberOfPawns++;
+                        break;
+
+                    case "bishop":
+                        if (piece.Color == "white") numberOfWhiteBishops++;
+                        else if (piece.Color == "black") numberOfBlackBishops++;
+                        break;
+
+                    case "knight":
+                        if (piece.Color == "white") numberOfWhiteKnights++;
+                        else if (piece.Color == "black") numberOfBlackKnights++;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (numberOfQueens > 0) return "";
+            if (numberOfRooks > 0) return "";
+            if (numberOfPawns > 0) return "";
+
+            if (numberOfWhiteBishops > 1) return "";
+            if (numberOfBlackBishops > 1) return "";
+
+            if (numberOfWhiteKnights > 1) return "";
+            if (numberOfBlackKnights > 1) return "";
+
+            if (numberOfWhiteBishops > 0 && numberOfWhiteKnights > 0) return "";
+            if (numberOfBlackBishops > 0 && numberOfBlackKnights > 0) return "";
+
+            return "draw";
+        }
+
+
+        public string CheckForCheckOrStaleMate(Board board)
         {
             foreach (Piece piece in board.Pieces)
             {
@@ -284,14 +363,28 @@ namespace ChessClassLibrary
                         {
                             if (piece.CheckIfMovePutsSelfInCheck(board, position) == false)
                             {
-                                return false;
+                                return "";
                             }
                         }
                     }
                 }
             }
 
-            return true;
+            Position kingPosition = new Position(-1, -1);
+            kingPosition = FindKingPosition();
+
+            foreach (Piece piece in board.Pieces)
+            {
+                if (piece.Color != Turn)
+                {
+                    if (piece.CheckValidMove(board, kingPosition) == true)
+                    {
+                        return "checkmate";
+                    }
+                }
+            }
+
+            return "stalemate";
         }
 
         public void CheckForPromotion()

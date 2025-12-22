@@ -16,8 +16,11 @@ using System.Windows.Shapes;
 
 
 //TODO LIST
-//Drawing Rules
-//Castling Through Check/While Checked
+
+//3 Move Repition
+//50 Move No Captures
+
+
 
 //Potential Game Experience Features
 //Highlight your piece when it's clicked
@@ -58,9 +61,9 @@ namespace ChessUI
             InitializeComponent();
             InitializeBoard();
 
-            //board.TestCastle();
+            board.TestCastle();
             //board.TestSetup();
-            board.SetupGame();
+            //board.SetupGame();
             DrawBoard(board);
 
         }
@@ -156,10 +159,15 @@ namespace ChessUI
                                 DrawBoard(board);
                                 board.NextTurn();
                                 board.Promotion = false;
-                                if (board.CheckForMate(board) == true)
+
+                                string endOfGame = "";
+                                endOfGame = board.CheckForMateOrDraw(board);
+
+                                if (endOfGame == "checkmate")
                                 {
                                     Checkmate.Visibility = Visibility.Visible;
                                 }
+
                                 selectedPosition = null;
                                 selectedPiece = null;
                                 return;
@@ -223,11 +231,17 @@ namespace ChessUI
                     return;
                 }
 
+                string endOfGame = "";
+                endOfGame = board.CheckForMateOrDraw(board);
 
-
-                if (board.CheckForMate(board) == true)
+                if (endOfGame == "checkmate")
                 {
                     Checkmate.Visibility = Visibility.Visible;
+                }
+
+                if (endOfGame == "draw")
+                {
+                    Draw.Visibility = Visibility.Visible;
                 }
 
             }

@@ -169,6 +169,63 @@ namespace ChessClassLibrary
             oldPosition.Row = Position.Row;
             oldPosition.Column = Position.Column;
 
+            //Castling in or through check
+            if (Name == "king" && Math.Abs(Position.Column - newPosition.Column) == 2)
+            {
+                Position kingPosition1 = new Position(-1, -1);
+                Position kingPosition2 = new Position(-1, -1);
+                kingPosition1.Row = Position.Row;
+                kingPosition1.Column = Position.Column;
+                kingPosition2.Row = Position.Row;
+                if (Position.Column > newPosition.Column)
+                    kingPosition2.Column = Position.Column - 1;
+                else
+                    kingPosition2.Column = Position.Column + 1;
+
+                foreach (Piece piece in board.Pieces)
+                {
+                    Position.Row = kingPosition1.Row;
+                    Position.Column = kingPosition1.Column;
+
+                    if (piece.Position.Row == Position.Row && piece.Position.Column == Position.Column)
+                    {
+
+                    }
+                    else if (piece.CheckValidMove(board, kingPosition1))
+                    {
+                        Position.Row = oldPosition.Row;
+                        Position.Column = oldPosition.Column;
+                        foreach (Piece piece2 in board.Pieces)
+                        {
+                            if (piece2.Covered == true)
+                                piece2.Covered = false;
+                        }
+                        return true;
+                    }
+
+                    Position.Row = kingPosition2.Row;
+                    Position.Column = kingPosition2.Column;
+
+                    if (piece.Position.Row == Position.Row && piece.Position.Column == Position.Column)
+                    {
+
+                    }
+                    else if (piece.CheckValidMove(board, kingPosition2))
+                    {
+                        Position.Row = oldPosition.Row;
+                        Position.Column = oldPosition.Column;
+                        foreach (Piece piece2 in board.Pieces)
+                        {
+                            if (piece2.Covered == true)
+                                piece2.Covered = false;
+                        }
+                        return true;
+                    }
+                }
+            }
+            //Castling in or through check done
+
+
             Position.Row = newPosition.Row;
             Position.Column = newPosition.Column;
 
