@@ -1,6 +1,7 @@
 ﻿using ChessClassLibrary;
 using System.Buffers.Text;
 using System.Drawing;
+using System.IO.Pipelines;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,8 +18,10 @@ using System.Windows.Shapes;
 
 //TODO LIST
 
+//Refactor to decrease method complexity
+
 //3 Move Repition
-//50 Move No Captures
+//50 Move No Captures Or Pawn Advances
 
 
 
@@ -40,6 +43,7 @@ using System.Windows.Shapes;
 //Make my own, would be very rudimentary
 //Save the game in FEN or PGN format, pass to either local engine or web based engine to get back evaluation and best moves
 //Evaluation bar either by my bot or by an engine on screen or in replay/analysis
+//Can use https://chess-api.com/
 
 
 
@@ -49,216 +53,206 @@ namespace ChessUI
     public partial class MainWindow : Window
     {
 
-        private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
-        private Position selectedPosition = null;
-        private Piece selectedPiece = null;
-        Board board = new Board();
-
-
-
         public MainWindow()
         {
             InitializeComponent();
-            InitializeBoard();
 
-            board.TestCastle();
+            this.InitializeEmptyImagesForEachBoardSlot();
+
+            //board.TestCastle();
             //board.TestSetup();
-            //board.SetupGame();
-            DrawBoard(board);
+            board.SetupGame();
+
+            this.DrawBoard();
 
         }
 
-
-        private void InitializeBoard()
+        private void AssignOccupiedSpacesToImages()
         {
-            for (int r = 0; r < 8; r++)
+            foreach(var piece in board.Pieces)
             {
-                for (int c  = 0; c < 8; c++)
-                {
-                    System.Windows.Controls.Image image = new System.Windows.Controls.Image();
-                    pieceImages[r, c] = image;
-                    PieceGrid.Children.Add(image);
+                int row = piece.Position.Row;
+                int column = piece.Position.Column;
 
-                }
+                pieceImages[row, column].Source = Images.GetImage( piece );
             }
         }
 
-        public void DrawBoard(Board board)
+        private void AttemptToMovePieceToNewPosition( Position newPosition )
         {
-            for (int r = 0; r< 8 ; r++)
+            if(selectedPiece != null)
             {
-                for (int c = 0; c < 8 ; c++)
+                selectedPiece.Move( board, newPosition );
+                this.DrawBoard();
+
+                if(board.NeedToPromote == true)
                 {
-                    pieceImages[r, c].Source = null;
-                }
-            }
-            foreach (var piece in board.Pieces)
-            {
-                int r = piece.Position.Row;
-                int c = piece.Position.Column;
-
-                pieceImages[r, c].Source = Images.GetImage(piece);
-            }
-        }
-
-        public void DrawPromotionChoices(Board board)
-        {
-            foreach (var piece in board.PromotionList)
-            {
-                if (piece.Color == board.Turn)
-                {
-                    int r = piece.Position.Row;
-                    int c = piece.Position.Column;
-
-                    pieceImages[r, c].Source = Images.GetImage(piece);
-                }
-            }
-        }
-
-        private void BoardGrid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            System.Windows.Point point = e.GetPosition(BoardGrid);
-            Position pos = ToSquarePosition(point);
-
-
-            if (board.Promotion == true)
-            {
-                foreach(var piece in board.PromotionList)
-                {
-                    int posRow = pos.Row;
-                    int posCol = pos.Column;
-                    int pieceRow = piece.Position.Row;
-                    int pieceCol = piece.Position.Column;
-
-                    if (pieceRow == posRow && pieceCol == posCol)
-                    {
-                        foreach (var piece2 in board.Pieces)
-                        {
-                            if (piece2.Name == "pawn" && (piece2.Position.Row == 0 || piece2.Position.Row == 7))
-                            {
-                                int promotePositionRow = piece2.Position.Row;
-                                int promotePositionCol = piece2.Position.Column;
-                                board.Capture(promotePositionRow, promotePositionCol);
-                                switch (piece.Name)
-                                {
-                                    case "queen":
-                                        board.Pieces.Add(new Queen(piece.Name, piece.Color, promotePositionRow, promotePositionCol));
-                                        break;
-                                    case "rook":
-                                        board.Pieces.Add(new Piece(piece.Name, piece.Color, promotePositionRow, promotePositionCol));
-                                        break;
-                                    case "bishop":
-                                        board.Pieces.Add(new Piece(piece.Name, piece.Color, promotePositionRow, promotePositionCol));
-                                        break;
-                                    case "knight":
-                                        board.Pieces.Add(new Piece(piece.Name, piece.Color, promotePositionRow, promotePositionCol));
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                DrawBoard(board);
-                                board.NextTurn();
-                                board.Promotion = false;
-
-                                string endOfGame = "";
-                                endOfGame = board.CheckForMateOrDraw(board);
-
-                                if (endOfGame == "checkmate")
-                                {
-                                    Checkmate.Visibility = Visibility.Visible;
-                                }
-
-                                selectedPosition = null;
-                                selectedPiece = null;
-                                return;
-                            }
-                        }
-                    }
-                }
-                return;
-            }
-
-
-
-            if (selectedPosition == null)
-            {
-                OnFromPositionSelected(pos);
-            }
-            else
-            {
-                OnToPositionSelected(pos);
-            }
-        }
-
-        private void OnFromPositionSelected(Position pos)
-        {
-            foreach (var piece in board.Pieces)
-            {
-
-                int posRow = pos.Row;
-                int posCol = pos.Column;
-                int pieceRow = piece.Position.Row;
-                int pieceCol = piece.Position.Column;
-
-                if (pieceRow == posRow && pieceCol == posCol)
-                {
-                    selectedPiece = piece;
-                    selectedPosition = pos;
-                    if (selectedPiece.Color != board.Turn)
-                    {
-                        selectedPiece = null;
-                        selectedPosition = null;
-                    }
-                }
-                
-            }
-
-        }
-
-        private void OnToPositionSelected(Position pos)
-        {
-            if (selectedPiece != null)
-            {
-                selectedPiece.Move(board, pos);
-                DrawBoard(board);
-
-
-                if (board.Promotion == true)
-                {
-                    board.NextTurn();
-                    DrawPromotionChoices(board);
-                    board.Promotion = true;
+                    this.DrawPromotionChoices( board );
                     return;
                 }
 
-                string endOfGame = "";
-                endOfGame = board.CheckForMateOrDraw(board);
+                EndTurn();
+            }
+            else
+            {
+                this.DeselectPiece();
+            }
+        }
 
-                if (endOfGame == "checkmate")
-                {
-                    Checkmate.Visibility = Visibility.Visible;
-                }
+        private void BoardGrid_MouseDown( object sender, MouseButtonEventArgs e )
+        {
+            System.Windows.Point clickedPoint = e.GetPosition( BoardGrid );
+            Position clickedPosition = this.ToSquarePosition( clickedPoint );
 
-                if (endOfGame == "draw")
+            if(board.NeedToPromote)
+            {
+                this.Promotion( clickedPosition );
+            }
+
+            else if(selectedPosition == null)
+            {
+                this.SetSelectedPositionAndPiece( clickedPosition );
+            }
+
+            else
+            {
+                this.AttemptToMovePieceToNewPosition( clickedPosition );
+            }
+        }
+
+        private void CheckForEndOfGame()
+        {
+            string endOfGame = "";
+            endOfGame = board.CheckForMateOrDraw();
+
+            if(endOfGame == "checkmate")
+            {
+                Checkmate.Visibility = Visibility.Visible;
+            }
+
+            if(endOfGame == "draw")
+            {
+                Draw.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void ClearBoardImages()
+        {
+            for(int row = 0; row < 8; row++)
+            {
+                for(int column = 0; column < 8; column++)
                 {
-                    Draw.Visibility = Visibility.Visible;
+                    pieceImages[row, column].Source = null;
                 }
+            }
+        }
+        private void CreateImageForGridSlot( int row, int column )
+        {
+            System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+            pieceImages[row, column] = image;
+            PieceGrid.Children.Add( image );
+        }
+
+        private void DeselectPiece()
+        {
+            selectedPiece = null;
+            selectedPosition = null;
+        }
+
+        private void DrawBoard()
+        {
+            this.ClearBoardImages();
+
+            this.AssignOccupiedSpacesToImages();
+        }
+
+        private void DrawPromotionChoices( Board board )
+        {
+            foreach(var piece in board.PromotionList)
+            {
+                if(piece.Color == board.Turn)
+                {
+                    int row = piece.Position.Row;
+                    int column = piece.Position.Column;
+
+                    pieceImages[row, column].Source = Images.GetImage( piece );
+                }
+            }
+        }
+
+        private void EndTurn()
+        {
+            this.DrawBoard();
+            board.NextTurn();
+
+            this.CheckForEndOfGame();
+
+            board.AddFEN( board );
+            this.DeselectPiece();
+        }
+
+        private void InitializeEmptyImagesForEachBoardSlot()
+        {
+            for(int row = 0; row < 8; row++)
+            {
+                for(int column = 0; column < 8; column++)
+                {
+                    this.CreateImageForGridSlot( row, column );
+                }
+            }
+        }
+
+        private void Promotion( Position clickedPosition )
+        {
+            Piece? promotablePiece = board.CheckForPromotablePiece();
+            Piece? promoteToPiece = board.CheckForPieceToPromoteTo( clickedPosition );
+
+            if(promotablePiece != null && promoteToPiece != null)
+            {
+
+                board.PromotePiece( promotablePiece, promoteToPiece );
+                board.NeedToPromote = false;
+                this.EndTurn();
 
             }
-            selectedPosition = null;
-            selectedPiece = null;
         }
 
+        private void SetPositionAndPieceIfCorrectTurn( Piece piece, Position clickedPosition )
+        {
+            selectedPiece = piece;
+            selectedPosition = clickedPosition;
 
-        private Position ToSquarePosition(System.Windows.Point point)
+            if(selectedPiece.Color != board.Turn)
+            {
+                this.DeselectPiece();
+            }
+
+        }
+
+        private void SetSelectedPositionAndPiece( Position clickedPosition )
+        {
+            foreach(var piece in board.Pieces)
+            {
+
+                if(piece.Position.IsEqual( clickedPosition ))
+                {
+                    this.SetPositionAndPieceIfCorrectTurn( piece, clickedPosition );
+                }
+            }
+        }
+
+        private Position ToSquarePosition( System.Windows.Point point )
         {
             double squareSize = BoardGrid.ActualWidth / 8;
-            int row = (int)(point.Y / squareSize);
-            int col = (int)(point.X / squareSize);
-            return new Position(row, col);
+            int row = (int)( point.Y / squareSize );
+            int col = (int)( point.X / squareSize );
+            return new Position( row, col );
 
         }
-        
 
+        private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
+        Board board = new Board();
+        private Piece selectedPiece = null;
+        private Position selectedPosition = null;
     }
 }

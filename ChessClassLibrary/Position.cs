@@ -22,5 +22,18 @@ namespace ChessClassLibrary
             else
                 return "dark";
         }
+
+        public bool IsEqual(Position otherPosition)
+        {
+            int comparedRow = otherPosition.Row;
+            int comparedColumn = otherPosition.Column;
+
+            if(this.Row == comparedRow && this.Column == comparedColumn)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
