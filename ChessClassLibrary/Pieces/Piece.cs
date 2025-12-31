@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -48,122 +49,63 @@ namespace ChessClassLibrary
             return false;
         }
 
-        public bool IsKingValidMove( Board board )
+        public bool CheckIfKingIsCastlingThroughCheck( Board board, Position newPosition, Position oldPosition )
         {
-            if(CheckValidMove( board, board.FindKingPosition() ))
+            Position intermediateKingPosition = new Position( this.Position.Row, -1 );
+
+            if(this.Position.Column > newPosition.Column)
+                intermediateKingPosition.Column = this.Position.Column - 1;
+            else
+                intermediateKingPosition.Column = this.Position.Column + 1;
+
+            //Check If currently in Check
+            if(board.IsAttackingTheKingValid())
             {
                 return true;
             }
-            else
+
+            //Check If intermediary Position is in Check
+            this.Position.Row = intermediateKingPosition.Row;
+            this.Position.Column = intermediateKingPosition.Column;
+            if(board.IsAttackingTheKingValid())
             {
-                return false;
+                return true;
             }
+
+            return false;
         }
 
         public bool CheckIfMovePutsSelfInCheck( Board board, Position newPosition )
         {
 
-            foreach(Piece piece in board.Pieces)
+            Position oldPosition = new Position( Position.Row, Position.Column );
+
+            board.CoverToBeCapturedPiece( newPosition );
+
+            //If this piece is a king and is trying to Castle
+            if(this.Name == "king" && Math.Abs( Position.Column - newPosition.Column ) == 2)
             {
-                if(piece.Position.Row == newPosition.Row && piece.Position.Column == newPosition.Column)
+                if(CheckIfKingIsCastlingThroughCheck( board, newPosition, oldPosition ))
                 {
-                    piece.Covered = true;
-                }
-            }
-
-            Position oldPosition = new Position( -1, -1 );
-            oldPosition.Row = Position.Row;
-            oldPosition.Column = Position.Column;
-
-            //Castling in or through check
-            if(Name == "king" && Math.Abs( Position.Column - newPosition.Column ) == 2)
-            {
-                Position kingPosition1 = new Position( -1, -1 );
-                Position kingPosition2 = new Position( -1, -1 );
-                kingPosition1.Row = Position.Row;
-                kingPosition1.Column = Position.Column;
-                kingPosition2.Row = Position.Row;
-                if(Position.Column > newPosition.Column)
-                    kingPosition2.Column = Position.Column - 1;
-                else
-                    kingPosition2.Column = Position.Column + 1;
-
-                foreach(Piece piece in board.Pieces)
-                {
-                    Position.Row = kingPosition1.Row;
-                    Position.Column = kingPosition1.Column;
-
-                    if(piece.Position.Row == Position.Row && piece.Position.Column == Position.Column)
-                    {
-
-                    }
-                    else if(piece.CheckValidMove( board, kingPosition1 ))
-                    {
-                        Position.Row = oldPosition.Row;
-                        Position.Column = oldPosition.Column;
-                        foreach(Piece piece2 in board.Pieces)
-                        {
-                            if(piece2.Covered == true)
-                                piece2.Covered = false;
-                        }
-                        return true;
-                    }
-
-                    Position.Row = kingPosition2.Row;
-                    Position.Column = kingPosition2.Column;
-
-                    if(piece.Position.Row == Position.Row && piece.Position.Column == Position.Column)
-                    {
-
-                    }
-                    else if(piece.CheckValidMove( board, kingPosition2 ))
-                    {
-                        Position.Row = oldPosition.Row;
-                        Position.Column = oldPosition.Column;
-                        foreach(Piece piece2 in board.Pieces)
-                        {
-                            if(piece2.Covered == true)
-                                piece2.Covered = false;
-                        }
-                        return true;
-                    }
-                }
-            }
-            //Castling in or through check done
-
-
-            Position.Row = newPosition.Row;
-            Position.Column = newPosition.Column;
-
-            Position kingPosition = board.FindKingPosition();
-
-            foreach(Piece piece in board.Pieces)
-            {
-                if(piece.Position.Row == Position.Row && piece.Position.Column == Position.Column)
-                {
-
-                }
-                else if(piece.CheckValidMove( board, kingPosition ))
-                {
-                    Position.Row = oldPosition.Row;
-                    Position.Column = oldPosition.Column;
-                    foreach(Piece piece2 in board.Pieces)
-                    {
-                        if(piece2.Covered == true)
-                            piece2.Covered = false;
-                    }
+                    ResetPiecePosition( board, oldPosition );
                     return true;
                 }
             }
 
-            Position.Row = oldPosition.Row;
-            Position.Column = oldPosition.Column;
-            foreach(Piece piece2 in board.Pieces)
+            Position.Row = newPosition.Row;
+            Position.Column = newPosition.Column;
+
+            if(board.IsAttackingTheKingValid())
             {
-                if(piece2.Covered == true)
-                    piece2.Covered = false;
+                ResetPiecePosition( board, oldPosition );
+                return true;
             }
-            return false;
+            else
+            {
+                ResetPiecePosition( board, oldPosition );
+                return false;
+            }
+
         }
 
         public virtual bool CheckValidMove( Board board, Position newPosition )
@@ -183,95 +125,68 @@ namespace ChessClassLibrary
             }
         }
 
+        public bool IsKingValidMove( Board board )
+        {
+            if(CheckValidMove( board, board.FindKingPosition() ))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public void Move( Board board, Position newPosition )
         {
-
-            //Castling
-            if(Name == "king")
-            {
-                int horizontalMove = newPosition.Column - Position.Column;
-                if(Math.Abs( horizontalMove ) == 2)
-                {
-                    foreach(Piece piece in board.Pieces)
-                    {
-                        if(piece.Name == "rook" && piece.Color == Color && piece.HasMoved == false)
-                        {
-                            if(( horizontalMove < 0 && piece.Position.Column < 4 ) || ( horizontalMove > 0 && piece.Position.Column > 4 ))
-                            {
-                                if(piece.Position.Column < Position.Column)
-                                {
-                                    piece.Position.Column = Position.Column - 1;
-                                }
-                                else
-                                {
-                                    piece.Position.Column = Position.Column + 1;
-                                }
-                                piece.HasMoved = true;
-                            }
-                        }
-                    }
-                }
-            }
 
             int numberOfMoves = board.Moves.Count;
             int nextMove = numberOfMoves + 1;
 
-            int enPassantCaptureRow = -1;
-            int enPassantCaptureCol = -1;
-            string enPassantCaptureColor = "none";
-            bool enPassantCapture = false;
+            //En Passant Capture
 
-            //Check For En Passant
-
-            if(Name == "pawn" && newPosition.Column != Position.Column && board.CheckForPiece( newPosition ) == "none")
+            if(this.Name == "pawn" && newPosition.Column != this.Position.Column && board.CheckForPiece( newPosition ) == "none")
             {
-                enPassantCapture = true;
-                enPassantCaptureRow = newPosition.Row;
-                enPassantCaptureCol = newPosition.Column;
-                enPassantCaptureColor = Color;
+                Position enPassantCapturePosition = FindEnPassantCapturePosition( newPosition );
+                Piece capturedPiece = board.WhatPieceIsHere( enPassantCapturePosition );
+                board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                board.Capture( enPassantCapturePosition );
             }
 
-            //If you capture normally
-            if(board.CheckForPiece( newPosition ) != "none")
+            //Normal Capture
+            else if(board.CheckForPiece( newPosition ) != "none")
             {
                 Piece capturedPiece = board.WhatPieceIsHere( newPosition );
                 board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
                 board.Capture( newPosition );
             }
-            //else if you capture using En Passant
-            else if(enPassantCapture == true)
-            {
-                Position enPassantCapturedPosition = new Position( -1, -1 );
-                switch(enPassantCaptureColor)
-                {
-                    case "white":
-                        enPassantCapturedPosition.Row = enPassantCaptureRow + 1;
-                        enPassantCapturedPosition.Column = enPassantCaptureCol;
-                        Piece capturedPieceW = board.WhatPieceIsHere( newPosition );
-                        board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, capturedPieceW, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
-                        board.Capture( enPassantCapturedPosition );
-                        break;
 
-                    case "black":
-                        enPassantCapturedPosition.Row = enPassantCaptureRow - 1;
-                        enPassantCapturedPosition.Column = enPassantCaptureCol;
-                        Piece capturedPieceB = board.WhatPieceIsHere( newPosition );
-                        board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, capturedPieceB, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
-                        board.Capture( enPassantCapturedPosition );
-                        break;
-                }
+            //Rook Castling Move
+            else if(this.Name == "king" && Math.Abs( newPosition.Column - this.Position.Column ) == 2)
+            {
+                board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true ) );
+                this.CastleRookMove( board, newPosition );
             }
-            //else you don't capture
+
+            //Normal Move
             else
             {
                 board.Moves.Add( new ChessClassLibrary.Move( nextMove, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
             }
 
+            this.MoveSquare( board, newPosition );
             Position = newPosition;
             HasMoved = true;
 
-
             board.CheckForPromotion();
+        }
+
+        private void MoveSquare( Board board, Position newPosition )
+        {
+            Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( this.Position ) );
+            oldSquare.Piece = null;
+
+            Square? newSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( newPosition ) );
+            newSquare.Piece = this;
         }
 
         public bool PositionsAreEqual( Piece otherPiece )
@@ -284,7 +199,6 @@ namespace ChessClassLibrary
             return false;
         }
 
-        //Method
         protected int MoveCloserToZero( int number )
         {
             if(number > 0)
@@ -299,8 +213,56 @@ namespace ChessClassLibrary
                 return number;
         }
 
+        private void CastleRookMove( Board board, Position newPosition )
+        {
+            int targetRookColumn = -1;
+            int finalRookColumn = -1;
+            if(Math.Abs( newPosition.Column - Position.Column ) > 0)
+            {
+                targetRookColumn = 7;
+                finalRookColumn = 5;
+            }
+            else
+            {
+                targetRookColumn = 0;
+                finalRookColumn = 3;
+            }
+
+            Piece? rook = board.Pieces.FirstOrDefault( p =>
+                p.Name == "rook" &&
+                p.Color == this.Color &&
+                p.Position.Row == this.Position.Row &&
+                p.Position.Column == targetRookColumn
+            );
+
+            rook.Position.Column = finalRookColumn;
+            rook.HasMoved = true;
+        }
+
+        private Position FindEnPassantCapturePosition( Position newPosition )
+        {
+            Position capturePosition = new Position( newPosition.Row, newPosition.Column );
+
+            if(this.Color == "white")
+            {
+                capturePosition.Row++;
+            }
+            else
+            {
+                capturePosition.Row--;
+            }
+
+            return capturePosition;
+        }
+
+        private void ResetPiecePosition( Board board, Position oldPosition )
+        {
+            Position.Row = oldPosition.Row;
+            Position.Column = oldPosition.Column;
+            board.UncoverPieces();
+        }
         public string Color { get; protected set; }
-        public bool Covered { get; protected set; } = false;
+        public bool Covered { get; set; } = false;
         public bool HasMoved { get; set; } = false;
         public string Name { get; protected set; }
         public string OpponentColor { get; protected set; }

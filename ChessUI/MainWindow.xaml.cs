@@ -81,7 +81,14 @@ namespace ChessUI
             {
                 if(selectedPiece.AllowedToMove( board, square.Position ))
                 {
-                    highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "empty" );
+                    if(square.Piece != null)
+                    {
+                        highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "capture" );
+                    }
+                    else
+                    {
+                        highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "empty" );
+                    }
                 }
             }
         }

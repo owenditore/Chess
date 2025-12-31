@@ -56,7 +56,11 @@ namespace ChessUI
         {
             if(type == "empty")
             {
-                return LoadImage( "Assets/BlackRing.png" );
+                return LoadImage( "Assets/Dot.png" );
+            }
+            else if (type == "capture")
+            {
+                return LoadImage( "Assets/CaptureRing.png" );
             }
             else
             {

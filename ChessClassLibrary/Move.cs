@@ -15,12 +15,15 @@ namespace ChessClassLibrary
 
         public Piece CapturedPiece { get; set; }
 
+        public bool Castle { get; set;  }
+
         public string Notation { get; set; }
 
         public int Number {  get; set; } = 0;
 
 
         //Constructors
+
         public Move(int number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
         {
             this.Number = number;
@@ -39,11 +42,21 @@ namespace ChessClassLibrary
             GenerateNotation();
         }
 
-        public Move(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public Move(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn, bool castle)
         {
             this.Number = number;
             this.StartingPosition = new Position(startRow, startColumn);
             this.EndingPosition = new Position(endRow, endColumn);
+            this.Piece = movedPiece;
+            this.Castle = castle;
+            GenerateNotation();
+        }
+
+        public Move( int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        {
+            this.Number = number;
+            this.StartingPosition = new Position( startRow, startColumn );
+            this.EndingPosition = new Position( endRow, endColumn );
             this.Piece = movedPiece;
             GenerateNotation();
         }

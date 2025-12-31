@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Transactions;
@@ -18,6 +19,40 @@ namespace ChessClassLibrary
                     this.Squares.Add( new Square( row, column ) );
                 }
             }
+        }
+
+        public void CoverToBeCapturedPiece( Position position )
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Position.IsEqual( position ))
+                {
+                    piece.Covered = true;
+                }
+            }
+        }
+
+        public void UncoverPieces()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Covered == true)
+                {
+                    piece.Covered = false;
+                }
+            }
+        }
+
+        public bool IsAttackingTheKingValid()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Covered == false && piece.CheckValidMove(this, this.FindKingPosition()))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void AddAPiece( Piece piece )
@@ -43,7 +78,7 @@ namespace ChessClassLibrary
 
             this.Pieces.RemoveAll( piece => piece.Position.IsEqual( givenPosition ) );
 
-            Square? square = this.Squares.FirstOrDefault( s => s.Position.IsEqual(givenPosition));
+            Square? square = this.Squares.FirstOrDefault( s => s.Position.IsEqual( givenPosition ) );
             square.Piece = null;
 
         }
@@ -85,7 +120,7 @@ namespace ChessClassLibrary
             return "stalemate";
         }
 
-        private Dictionary<string,int> CountTypesOfPieces()
+        private Dictionary<string, int> CountTypesOfPieces()
         {
             int numberOfQueens = 0;
             int numberOfRooks = 0;
@@ -139,7 +174,7 @@ namespace ChessClassLibrary
 
             return numberOfPieces;
         }
-        
+
         public string CheckForInsufficientMaterial()
         {
             Dictionary<string, int> numberOfPieces = this.CountTypesOfPieces();
@@ -159,7 +194,7 @@ namespace ChessClassLibrary
 
             return "draw";
         }
-        
+
         public string CheckForMateOrDraw()
         {
             string checkForMate = this.CheckForCheckOrStaleMate();
@@ -182,7 +217,7 @@ namespace ChessClassLibrary
         {
             foreach(Piece piece in Pieces)
             {
-                if(piece.Position.IsEqual(position) == true && piece.Covered == false)
+                if(piece.Position.IsEqual( position ) == true && piece.Covered == false)
                 {
                     return piece.Color;
                 }
@@ -194,7 +229,7 @@ namespace ChessClassLibrary
         public Piece CheckForPieceToPromoteTo( Position clickedPosition )
         {
             Piece? pieceToPromoteTo = this.PromotionList.FirstOrDefault( p =>
-                p.Position.IsEqual( clickedPosition) &&
+                p.Position.IsEqual( clickedPosition ) &&
                 p.Color == this.Turn
             );
 
@@ -228,7 +263,7 @@ namespace ChessClassLibrary
                 p.Position.Row == 0
             );
 
-            if ( whitePawnToPromote != null || blackPawnToPromote != null)
+            if(whitePawnToPromote != null || blackPawnToPromote != null)
             {
                 NeedToPromote = true;
             }
@@ -417,7 +452,7 @@ namespace ChessClassLibrary
         public Piece WhatPieceIsHere( Position newPosition )
         {
             Piece? piece = this.Pieces.FirstOrDefault( p =>
-                p.Position.IsEqual(newPosition)
+                p.Position.IsEqual( newPosition )
             );
 
             return piece;
