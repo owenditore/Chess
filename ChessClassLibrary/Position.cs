@@ -15,14 +15,6 @@ namespace ChessClassLibrary
             Column = column; 
         }
 
-        public string SquareColor()
-        {
-            if (((Row + Column) % 2) == 0)
-                return "light";
-            else
-                return "dark";
-        }
-
         public bool IsEqual(Position otherPosition)
         {
             int comparedRow = otherPosition.Row;

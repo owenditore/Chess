@@ -57,10 +57,8 @@ namespace ChessUI
         {
             InitializeComponent();
 
-            this.InitializeEmptyImagesForEachBoardSlot();
+            this.InitializeBoardGraphics();
 
-            //board.TestCastle();
-            //board.TestSetup();
             board.SetupGame();
 
             this.DrawBoard();
@@ -77,10 +75,20 @@ namespace ChessUI
                 pieceImages[row, column].Source = Images.GetImage( piece );
             }
         }
+        private void AssignHighlights()
+        {
+            foreach(var square in board.Squares)
+            {
+                if(selectedPiece.AllowedToMove( board, square.Position ))
+                {
+                    highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "empty" );
+                }
+            }
+        }
 
         private void AttemptToMovePieceToNewPosition( Position newPosition )
         {
-            if(selectedPiece != null)
+            if(selectedPiece.AllowedToMove( board, newPosition ))
             {
                 selectedPiece.Move( board, newPosition );
                 this.DrawBoard();
@@ -96,6 +104,7 @@ namespace ChessUI
             else
             {
                 this.DeselectPiece();
+                this.ClearBoardHighlights();
             }
         }
 
@@ -109,7 +118,7 @@ namespace ChessUI
                 this.Promotion( clickedPosition );
             }
 
-            else if(selectedPosition == null)
+            else if(selectedPiece == null)
             {
                 this.SetSelectedPositionAndPiece( clickedPosition );
             }
@@ -136,6 +145,17 @@ namespace ChessUI
             }
         }
 
+        private void ClearBoardHighlights()
+        {
+            for(int row = 0; row < 8; row++)
+            {
+                for(int column = 0; column < 8; column++)
+                {
+                    highlights[row, column].Source = null;
+                }
+            }
+        }
+
         private void ClearBoardImages()
         {
             for(int row = 0; row < 8; row++)
@@ -146,22 +166,29 @@ namespace ChessUI
                 }
             }
         }
-        private void CreateImageForGridSlot( int row, int column )
+        private void CreatePieceImageForGridSlot( int row, int column )
         {
             System.Windows.Controls.Image image = new System.Windows.Controls.Image();
             pieceImages[row, column] = image;
             PieceGrid.Children.Add( image );
         }
 
+        private void CreateHighlightImageForGridSlot( int row, int column )
+        {
+            System.Windows.Controls.Image highlight = new System.Windows.Controls.Image();
+            highlights[row, column] = highlight;
+            HighlightGrid.Children.Add( highlight );
+        }
+
         private void DeselectPiece()
         {
             selectedPiece = null;
-            selectedPosition = null;
         }
 
         private void DrawBoard()
         {
             this.ClearBoardImages();
+            this.ClearBoardHighlights();
 
             this.AssignOccupiedSpacesToImages();
         }
@@ -191,13 +218,14 @@ namespace ChessUI
             this.DeselectPiece();
         }
 
-        private void InitializeEmptyImagesForEachBoardSlot()
+        private void InitializeBoardGraphics()
         {
             for(int row = 0; row < 8; row++)
             {
                 for(int column = 0; column < 8; column++)
                 {
-                    this.CreateImageForGridSlot( row, column );
+                    this.CreatePieceImageForGridSlot( row, column );
+                    this.CreateHighlightImageForGridSlot( row, column );
                 }
             }
         }
@@ -220,13 +248,13 @@ namespace ChessUI
         private void SetPositionAndPieceIfCorrectTurn( Piece piece, Position clickedPosition )
         {
             selectedPiece = piece;
-            selectedPosition = clickedPosition;
 
             if(selectedPiece.Color != board.Turn)
             {
                 this.DeselectPiece();
+                return;
             }
-
+            this.AssignHighlights();
         }
 
         private void SetSelectedPositionAndPiece( Position clickedPosition )
@@ -251,8 +279,10 @@ namespace ChessUI
         }
 
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
+        private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
+
+
         Board board = new Board();
         private Piece selectedPiece = null;
-        private Position selectedPosition = null;
     }
 }

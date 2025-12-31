@@ -11,11 +11,24 @@ namespace ChessClassLibrary
     {
         public Board()
         {
-            for(int r = 0; r < 8; r++)
+            for(int row = 0; row < 8; row++)
             {
-                for(int c = 0; c < 8; c++)
+                for(int column = 0; column < 8; column++)
                 {
-                    Positions.Add( new Position( r, c ) );
+                    this.Squares.Add( new Square( row, column ) );
+                }
+            }
+        }
+
+        public void AddAPiece( Piece piece )
+        {
+            this.Pieces.Add( piece );
+
+            foreach(Square square in this.Squares)
+            {
+                if(square.Position.IsEqual( piece.Position ))
+                {
+                    square.Piece = piece;
                 }
             }
         }
@@ -25,62 +38,54 @@ namespace ChessClassLibrary
             FENs.Add( new FenNotation( board ) );
         }
 
-        public void Capture( Position position )
+        public void Capture( Position givenPosition )
         {
-            int posRow = position.Row;
-            int posCol = position.Column;
 
-            Pieces.RemoveAll( piece => piece.Position.Row == posRow && piece.Position.Column == posCol );
+            this.Pieces.RemoveAll( piece => piece.Position.IsEqual( givenPosition ) );
 
-        }
+            Square? square = this.Squares.FirstOrDefault( s => s.Position.IsEqual(givenPosition));
+            square.Piece = null;
 
-        public void Capture( int row, int column )
-        {
-            Pieces.RemoveAll( piece => piece.Position.Row == row && piece.Position.Column == column );
         }
 
         public void Capture( Piece givenPiece )
         {
-            Pieces.RemoveAll( piece => piece.IsEqual( givenPiece ) );
+            this.Pieces.RemoveAll( piece => piece.IsEqual( givenPiece ) );
+            Square? square = this.Squares.FirstOrDefault( s => s.Position.IsEqual( givenPiece.Position ) );
+            square.Piece = null;
+        }
+
+        public bool AnyPieceAllowedToMove()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Color == this.Turn && piece.AllowedToMoveAnywhere( this ) == true)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public string CheckForCheckOrStaleMate()
         {
-            foreach(Piece piece in Pieces)
+            if(AnyPieceAllowedToMove())
             {
-                if(piece.Color == Turn)
-                {
-                    foreach(Position position in Positions)
-                    {
-                        if(piece.CheckValidMove( this, position ) == true)
-                        {
-                            if(piece.CheckIfMovePutsSelfInCheck( this, position ) == false)
-                            {
-                                return "";
-                            }
-                        }
-                    }
-                }
+                return "";
             }
 
-            Position kingPosition = new Position( -1, -1 );
-            kingPosition = FindKingPosition();
-
-            foreach(Piece piece in Pieces)
+            foreach(Piece piece in this.Pieces)
             {
-                if(piece.Color != Turn)
+                if(piece.Color != Turn && piece.IsKingValidMove( this ))
                 {
-                    if(piece.CheckValidMove( this, kingPosition ) == true)
-                    {
-                        return "checkmate";
-                    }
+                    return "checkmate";
                 }
             }
 
             return "stalemate";
         }
 
-        public string CheckForInsufficientMaterial()
+        private Dictionary<string,int> CountTypesOfPieces()
         {
             int numberOfQueens = 0;
             int numberOfRooks = 0;
@@ -121,29 +126,45 @@ namespace ChessClassLibrary
                 }
             }
 
-            if(numberOfQueens > 0) return "";
-            if(numberOfRooks > 0) return "";
-            if(numberOfPawns > 0) return "";
+            var numberOfPieces = new Dictionary<string, int>
+            {
+                { "queen", numberOfQueens },
+                { "rook", numberOfRooks },
+                { "pawn", numberOfPawns },
+                { "whiteBishop", numberOfWhiteBishops },
+                { "blackBishop", numberOfBlackBishops },
+                { "whiteKnight", numberOfWhiteKnights },
+                { "blackKnight", numberOfBlackKnights }
+            };
 
-            if(numberOfWhiteBishops > 1) return "";
-            if(numberOfBlackBishops > 1) return "";
+            return numberOfPieces;
+        }
+        
+        public string CheckForInsufficientMaterial()
+        {
+            Dictionary<string, int> numberOfPieces = this.CountTypesOfPieces();
 
-            if(numberOfWhiteKnights > 1) return "";
-            if(numberOfBlackKnights > 1) return "";
+            if(numberOfPieces["queen"] > 0) return "";
+            if(numberOfPieces["rook"] > 0) return "";
+            if(numberOfPieces["pawn"] > 0) return "";
 
-            if(numberOfWhiteBishops > 0 && numberOfWhiteKnights > 0) return "";
-            if(numberOfBlackBishops > 0 && numberOfBlackKnights > 0) return "";
+            if(numberOfPieces["whiteBishop"] > 1) return "";
+            if(numberOfPieces["blackBishop"] > 1) return "";
+
+            if(numberOfPieces["whiteKnight"] > 1) return "";
+            if(numberOfPieces["blackKnight"] > 1) return "";
+
+            if(numberOfPieces["whiteBishop"] > 0 && numberOfPieces["whiteKnight"] > 0) return "";
+            if(numberOfPieces["blackBishop"] > 0 && numberOfPieces["blackKnight"] > 0) return "";
 
             return "draw";
         }
-
+        
         public string CheckForMateOrDraw()
         {
             string checkForMate = this.CheckForCheckOrStaleMate();
-            if(checkForMate == "checkmate") return checkForMate;
-
-            string checkForStaleMate = this.CheckForCheckOrStaleMate();
-            if(checkForStaleMate == "stalemate") return "draw";
+            if(checkForMate == "checkmate") return "checkmate";
+            if(checkForMate == "stalemate") return "draw";
 
             string checkForInsufficientMaterial = this.CheckForInsufficientMaterial();
             if(checkForInsufficientMaterial == "draw") return "draw";
@@ -161,19 +182,23 @@ namespace ChessClassLibrary
         {
             foreach(Piece piece in Pieces)
             {
-                int posRow = position.Row;
-                int posCol = position.Column;
-                int pieceRow = piece.Position.Row;
-                int pieceCol = piece.Position.Column;
-
-                if(pieceRow == posRow && pieceCol == posCol)
+                if(piece.Position.IsEqual(position) == true && piece.Covered == false)
                 {
-                    if(piece.Covered == false)
-                        return piece.Color;
+                    return piece.Color;
                 }
 
             }
             return "none";
+        }
+
+        public Piece CheckForPieceToPromoteTo( Position clickedPosition )
+        {
+            Piece? pieceToPromoteTo = this.PromotionList.FirstOrDefault( p =>
+                p.Position.IsEqual( clickedPosition) &&
+                p.Color == this.Turn
+            );
+
+            return pieceToPromoteTo;
         }
 
         public Piece CheckForPromotablePiece()
@@ -189,19 +214,23 @@ namespace ChessClassLibrary
 
         public void CheckForPromotion()
         {
-            foreach(Piece piece in Pieces)
+            Piece? whitePawnToPromote = this.Pieces.FirstOrDefault( p =>
+                p.Color == this.Turn &&
+                p.Color == "white" &&
+                p.Name == "pawn" &&
+                p.Position.Row == 0
+            );
+
+            Piece? blackPawnToPromote = this.Pieces.FirstOrDefault( p =>
+                p.Color == this.Turn &&
+                p.Color == "black" &&
+                p.Name == "pawn" &&
+                p.Position.Row == 0
+            );
+
+            if ( whitePawnToPromote != null || blackPawnToPromote != null)
             {
-                if(piece.Color == Turn && piece.Name == "pawn")
-                {
-                    if(piece.Color == "white" && piece.Position.Row == 0)
-                    {
-                        NeedToPromote = true;
-                    }
-                    else if(piece.Color == "black" && piece.Position.Row == 7)
-                    {
-                        NeedToPromote = true;
-                    }
-                }
+                NeedToPromote = true;
             }
         }
 
@@ -268,6 +297,29 @@ namespace ChessClassLibrary
                 Turn = "white";
         }
 
+        public void PromotePiece( Piece promotablePiece, Piece promoteToPiece )
+        {
+            switch(promoteToPiece.Name)
+            {
+                case "queen":
+                    this.Pieces.Add( new Queen( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
+                    break;
+                case "rook":
+                    this.Pieces.Add( new Rook( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
+                    break;
+                case "bishop":
+                    this.Pieces.Add( new Bishop( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
+                    break;
+                case "knight":
+                    this.Pieces.Add( new Knight( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
+                    break;
+                default:
+                    break;
+            }
+
+            this.Capture( promotablePiece );
+        }
+
         public Move ReturnLastMove( Board board )
         {
             int numberOfMoves = board.Moves.Count();
@@ -325,133 +377,59 @@ namespace ChessClassLibrary
             Queen blackQueen = new Queen( "queen", "black", 0, 3 );
             King blackKing = new King( "king", "black", 0, 4 );
 
-            Pieces.Add( whitePawnA );
-            Pieces.Add( whitePawnB );
-            Pieces.Add( whitePawnC );
-            Pieces.Add( whitePawnD );
-            Pieces.Add( whitePawnE );
-            Pieces.Add( whitePawnF );
-            Pieces.Add( whitePawnG );
-            Pieces.Add( whitePawnH );
-            Pieces.Add( whiteRookA );
-            Pieces.Add( whiteRookH );
-            Pieces.Add( whiteKnightB );
-            Pieces.Add( whiteKnightG );
-            Pieces.Add( whiteBishopC );
-            Pieces.Add( whiteBishopF );
-            Pieces.Add( whiteQueen );
-            Pieces.Add( whiteKing );
+            AddAPiece( whitePawnA );
+            AddAPiece( whitePawnB );
+            AddAPiece( whitePawnC );
+            AddAPiece( whitePawnD );
+            AddAPiece( whitePawnE );
+            AddAPiece( whitePawnF );
+            AddAPiece( whitePawnG );
+            AddAPiece( whitePawnH );
+            AddAPiece( whiteRookA );
+            AddAPiece( whiteRookH );
+            AddAPiece( whiteKnightB );
+            AddAPiece( whiteKnightG );
+            AddAPiece( whiteBishopC );
+            AddAPiece( whiteBishopF );
+            AddAPiece( whiteQueen );
+            AddAPiece( whiteKing );
 
-            Pieces.Add( blackPawnA );
-            Pieces.Add( blackPawnB );
-            Pieces.Add( blackPawnC );
-            Pieces.Add( blackPawnD );
-            Pieces.Add( blackPawnE );
-            Pieces.Add( blackPawnF );
-            Pieces.Add( blackPawnG );
-            Pieces.Add( blackPawnH );
-            Pieces.Add( blackRookA );
-            Pieces.Add( blackRookH );
-            Pieces.Add( blackKnightB );
-            Pieces.Add( blackKnightG );
-            Pieces.Add( blackBishopC );
-            Pieces.Add( blackBishopF );
-            Pieces.Add( blackQueen );
-            Pieces.Add( blackKing );
+            AddAPiece( blackPawnA );
+            AddAPiece( blackPawnB );
+            AddAPiece( blackPawnC );
+            AddAPiece( blackPawnD );
+            AddAPiece( blackPawnE );
+            AddAPiece( blackPawnF );
+            AddAPiece( blackPawnG );
+            AddAPiece( blackPawnH );
+            AddAPiece( blackRookA );
+            AddAPiece( blackRookH );
+            AddAPiece( blackKnightB );
+            AddAPiece( blackKnightG );
+            AddAPiece( blackBishopC );
+            AddAPiece( blackBishopF );
+            AddAPiece( blackQueen );
+            AddAPiece( blackKing );
             CreatePromotionList();
 
-        }
-
-        public void TestCastle()
-        {
-            Rook whiteRookA = new Rook( "rook", "white", 7, 0 );
-            Rook whiteRookH = new Rook( "rook", "white", 7, 7 );
-            King whiteKing = new King( "king", "white", 7, 4 );
-            Rook blackRook = new Rook( "rook", "black", 3, 3 );
-            King blackKing = new King( "king", "black", 0, 4 );
-
-            Pieces.Add( whiteRookA );
-            Pieces.Add( whiteRookH );
-            Pieces.Add( whiteKing );
-            Pieces.Add( blackRook );
-            Pieces.Add( blackKing );
-            CreatePromotionList();
-        }
-
-        public void TestSetup()
-        {
-            Pawn testPawn1 = new Pawn( "pawn", "white", 6, 3 );
-            Pawn testPawn2 = new Pawn( "pawn", "black", 1, 2 );
-            Bishop testBishop1 = new Bishop( "bishop", "white", 5, 5 );
-            Rook testRook1 = new Rook( "rook", "white", 1, 1 );
-            Queen testQueen1 = new Queen( "queen", "white", 0, 0 );
-            Knight testKnight1 = new Knight( "knight", "black", 0, 7 );
-            King testKing1 = new King( "king", "white", 7, 0 );
-            King testKing2 = new King( "king", "black", 5, 7 );
-            Pieces.Add( testPawn1 );
-            Pieces.Add( testPawn2 );
-
-            Pieces.Add( testKing1 );
-            Pieces.Add( testKing2 );
-            CreatePromotionList();
         }
 
         public Piece WhatPieceIsHere( Position newPosition )
         {
-            foreach(Piece piece in Pieces)
-            {
-                if(piece.Position == newPosition)
-                {
-                    return piece;
-                }
-            }
-            return null;
+            Piece? piece = this.Pieces.FirstOrDefault( p =>
+                p.Position.IsEqual(newPosition)
+            );
+
+            return piece;
         }
 
-        public Piece CheckForPieceToPromoteTo( Position clickedPosition )
-        {
-            foreach(var piece in PromotionList)
-            {
-                if(piece.Position.IsEqual( clickedPosition ) && piece.Color == Turn)
-                {
-                    return piece;
-                }
-            }
-            return null;
-        }
-
-        public void PromotePiece( Piece promotablePiece, Piece promoteToPiece )
-        {
-            switch(promoteToPiece.Name)
-            {
-                case "queen":
-                    this.Pieces.Add( new Queen( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
-                    break;
-                case "rook":
-                    this.Pieces.Add( new Rook( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
-                    break;
-                case "bishop":
-                    this.Pieces.Add( new Bishop( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
-                    break;
-                case "knight":
-                    this.Pieces.Add( new Knight( promoteToPiece.Name, promoteToPiece.Color, promotablePiece.Position.Row, promotablePiece.Position.Column ) );
-                    break;
-                default:
-                    break;
-            }
-
-            this.Capture( promotablePiece );
-        }
-
-        public bool Check { get; set; } = false;
-        public bool CheckMate { get; set; } = false;
         public List<FenNotation> FENs { get; set; } = new List<FenNotation>();
         public List<Move> Moves { get; set; } = new List<Move>();
         public bool NeedToPromote { get; set; } = false;
         public List<Piece> Pieces { get; set; } = new List<Piece>();
 
-        public List<Position> Positions { get; set; } = new List<Position>();
         public List<Piece> PromotionList { get; set; } = new List<Piece>();
+        public List<Square> Squares { get; set; } = new List<Square>();
         public string Turn { get; set; } = "white";
     }
 }

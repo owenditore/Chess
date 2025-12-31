@@ -32,7 +32,8 @@ namespace ChessUI
 
         private static ImageSource LoadImage(string filepath)
         {
-            return new BitmapImage(new Uri(filepath, UriKind.Relative));
+            Uri uri = new Uri(filepath, UriKind.Relative);
+            return new BitmapImage(uri);
         }
 
         public static ImageSource GetImage(Piece piece)
@@ -50,5 +51,18 @@ namespace ChessUI
                     return null;
             }
         }
+
+        public static ImageSource GetHighlightImage(string type)
+        {
+            if(type == "empty")
+            {
+                return LoadImage( "Assets/BlackRing.png" );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
     }
 }
