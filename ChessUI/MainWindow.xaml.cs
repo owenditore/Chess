@@ -26,10 +26,8 @@ using System.Windows.Shapes;
 
 
 //Potential Game Experience Features
-//Highlight your piece when it's clicked
 //Highlight last move made in the game
-//Show Valid Moves for the piece
-//Show captures in a different color
+
 
 //More Involved Features for a full application
 //Main Menu before you start a game

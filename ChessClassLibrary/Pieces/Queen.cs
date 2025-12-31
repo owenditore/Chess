@@ -29,84 +29,27 @@ namespace ChessClassLibrary
             }
 
             //Moves vertically but not horizontally
-            else if (verticalMove != 0 && horizontalMove == 0)
+            else if (verticalMove != 0 && horizontalMove == 0 && CheckIfPieceCanMoveVertically( verticalMove, board, intermediaryPosition ))
             {
-                if (Math.Abs(verticalMove) == 1)
-                {
-
-                    return true;
-                }
-
-                do
-                {
-                    verticalMove = MoveCloserToZero(verticalMove);
-                    intermediaryPosition.Row = verticalMove + Position.Row;
-                    intermediaryPosition.Column = Position.Column;
-                    string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
-                    if (stateOfIntermediaryPosition != "none")
-                    {
-                        return false;
-                    }
-
-                } while (Math.Abs(verticalMove) != 1);
-
-
                 return true;
             }
 
             //Moves horizontally but not vertically
-            else if (verticalMove == 0 && horizontalMove != 0)
+            else if (verticalMove == 0 && horizontalMove != 0 && CheckIfPieceCanMoveHorizontally( horizontalMove, board, intermediaryPosition ))
             {
-                if (Math.Abs(horizontalMove) == 1)
-                {
-
-                    return true;
-                }
-
-                do
-                {
-                    horizontalMove = MoveCloserToZero(horizontalMove);
-                    intermediaryPosition.Row = Position.Row;
-                    intermediaryPosition.Column = horizontalMove + Position.Column;
-                    string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
-                    if (stateOfIntermediaryPosition != "none")
-                    {
-                        return false;
-                    }
-
-                } while (Math.Abs(horizontalMove) != 1);
-
                 return true;
             }
 
             //Moves diagonally
-            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0)
+            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0 && CheckIfPieceCanMoveDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
             {
-                if (Math.Abs(verticalMove) == 1)
-                {
-
-                    return true;
-                }
-                do
-                {
-                    verticalMove = MoveCloserToZero(verticalMove);
-                    horizontalMove = MoveCloserToZero(horizontalMove);
-                    intermediaryPosition.Row = verticalMove + Position.Row;
-                    intermediaryPosition.Column = horizontalMove + Position.Column;
-                    string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
-                    if (stateOfIntermediaryPosition != "none")
-                    {
-                        return false;
-                    }
-
-                } while (Math.Abs(verticalMove) != 1);
-
-
                 return true;
             }
 
             else
+            {
                 return false;
+            }
 
         }
 

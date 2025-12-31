@@ -25,6 +25,78 @@ namespace ChessClassLibrary
             }
         }
 
+
+        protected bool CheckIfPieceCanMoveVertically( int move, Board board, Position intermediaryPosition )
+        {
+            if(Math.Abs( move ) == 1)
+            {
+                return true;
+            }
+
+            do
+            {
+                move = MoveCloserToZero( move );
+                intermediaryPosition.Row = move + this.Position.Row;
+                intermediaryPosition.Column = this.Position.Column;
+                string stateOfIntermediaryPosition = board.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( move ) != 1);
+
+            return true;
+        }
+
+        protected bool CheckIfPieceCanMoveDiagonally( int verticalMove, int horizontalMove, Board board, Position intermediaryPosition )
+        {
+            if(Math.Abs( verticalMove ) == 1)
+            {
+
+                return true;
+            }
+            do
+            {
+                verticalMove = MoveCloserToZero( verticalMove );
+                horizontalMove = MoveCloserToZero( horizontalMove );
+                intermediaryPosition.Row = verticalMove + Position.Row;
+                intermediaryPosition.Column = horizontalMove + Position.Column;
+                string stateOfIntermediaryPosition = board.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( verticalMove ) != 1);
+
+
+            return true;
+        }
+
+        protected bool CheckIfPieceCanMoveHorizontally( int move, Board board, Position intermediaryPosition )
+        {
+            if(Math.Abs( move ) == 1)
+            {
+                return true;
+            }
+
+            do
+            {
+                move = MoveCloserToZero( move );
+                intermediaryPosition.Row = this.Position.Row;
+                intermediaryPosition.Column = move + this.Position.Column;
+                string stateOfIntermediaryPosition = board.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( move ) != 1);
+
+            return true;
+        }
+
         public bool AllowedToMove( Board board, Position newPosition )
         {
             if(CheckValidMove( board, newPosition ) == true && CheckIfMovePutsSelfInCheck( board, newPosition ) == false)
@@ -180,6 +252,15 @@ namespace ChessClassLibrary
             board.CheckForPromotion();
         }
 
+        private void MoveSquare(Board board, Position newPosition, Piece piece)
+        {
+            Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( piece.Position ) );
+            oldSquare.Piece = null;
+
+            Square? newSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( newPosition ) );
+            newSquare.Piece = this;
+        }
+
         private void MoveSquare( Board board, Position newPosition )
         {
             Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( this.Position ) );
@@ -235,8 +316,11 @@ namespace ChessClassLibrary
                 p.Position.Column == targetRookColumn
             );
 
+            Position newRookPosition = new Position( rook.Position.Row, finalRookColumn );
+            this.MoveSquare( board, newRookPosition, rook );
             rook.Position.Column = finalRookColumn;
             rook.HasMoved = true;
+            
         }
 
         private Position FindEnPassantCapturePosition( Position newPosition )

@@ -22,35 +22,19 @@ namespace ChessClassLibrary
             int verticalMove = newPosition.Row - Position.Row;
             int horizontalMove = newPosition.Column - Position.Column;
 
-            //No friendly piece at new position
+
             if (stateOfNewPosition == Color)
             {
                 return false;
             }
 
-            //Moves diagonally
-            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0)
+            else if(Math.Abs( verticalMove ) != Math.Abs( horizontalMove ) || verticalMove == 0)
             {
-                if (Math.Abs(verticalMove) == 1)
-                {
+                return false;
+            }
 
-                    return true;
-                }
-                do
-                {
-                    verticalMove = MoveCloserToZero(verticalMove);
-                    horizontalMove = MoveCloserToZero(horizontalMove);
-                    intermediaryPosition.Row = verticalMove + Position.Row;
-                    intermediaryPosition.Column = horizontalMove + Position.Column;
-                    string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
-                    if (stateOfIntermediaryPosition != "none")
-                    {
-                        return false;
-                    }
-
-                } while (Math.Abs(verticalMove) != 1);
-
-
+            else if(CheckIfPieceCanMoveDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
+            {
                 return true;
             }
 
