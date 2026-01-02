@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ChessClassLibrary
+{
+    public class Turn
+    {
+        //Properties
+        public Position StartingPosition { get; set; }
+
+        public Position EndingPosition { get; set; }
+
+        public Piece Piece { get; set; }
+
+        public Piece CapturedPiece { get; set; }
+
+        public bool Castle { get; set;  }
+
+        public string Notation { get; set; }
+
+        public int Number {  get; set; } = 0;
+
+
+        //Constructors
+
+        public Turn(int number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        {
+            this.Number = number;
+            this.StartingPosition = new Position(startRow, startColumn);
+            this.EndingPosition = new Position(endRow, endColumn);
+            this.Piece = movedPiece;
+            this.CapturedPiece = capturedPiece;
+            GenerateNotation();
+        }
+        public Turn(Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        {
+            this.StartingPosition = new Position(startRow, startColumn);
+            this.EndingPosition = new Position(endRow, endColumn);
+            this.Piece = movedPiece;
+            this.CapturedPiece = capturedPiece;
+            GenerateNotation();
+        }
+
+        public Turn(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn, bool castle)
+        {
+            this.Number = number;
+            this.StartingPosition = new Position(startRow, startColumn);
+            this.EndingPosition = new Position(endRow, endColumn);
+            this.Piece = movedPiece;
+            this.Castle = castle;
+            GenerateNotation();
+        }
+
+        public Turn( int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        {
+            this.Number = number;
+            this.StartingPosition = new Position( startRow, startColumn );
+            this.EndingPosition = new Position( endRow, endColumn );
+            this.Piece = movedPiece;
+            GenerateNotation();
+        }
+
+        public Turn(Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        {
+            this.StartingPosition = new Position(startRow, startColumn);
+            this.EndingPosition = new Position(endRow, endColumn);
+            this.Piece = movedPiece;
+            GenerateNotation();
+        }
+
+        public Turn(Piece piece, Piece capturedPiece, Position startingPosition, Position endingPosition)
+        {
+            this.StartingPosition = new Position(startingPosition.Row, startingPosition.Column);
+            this.EndingPosition = new Position(endingPosition.Row, endingPosition.Column);
+            this.Piece = piece;
+            this.CapturedPiece = capturedPiece;
+            GenerateNotation();
+        }
+
+        public Turn(Piece piece, Position startingPosition, Position endingPosition)
+        {
+            this.StartingPosition = new Position(startingPosition.Row, startingPosition.Column);
+            this.EndingPosition = new Position(endingPosition.Row, endingPosition.Column);
+            this.Piece = piece;
+            GenerateNotation();
+        }
+
+        public void GenerateNotation()
+        {
+
+        }
+    }
+}

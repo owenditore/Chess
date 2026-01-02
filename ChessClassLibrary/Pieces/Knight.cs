@@ -17,34 +17,30 @@ namespace ChessClassLibrary
 
         public override bool CheckValidMove(Board board, Position newPosition)
         {
-            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
-            int verticalMove = newPosition.Row - Position.Row;
-            int horizontalMove = newPosition.Column - Position.Column;
 
-            //No friendly piece at new position
-            if (stateOfNewPosition == Color)
+            Move move = new Move( this.Position, newPosition );
+
+            if(this.ColorOfPieceAtNewPositionIsMyColor( board, newPosition ))
             {
                 return false;
             }
 
-            //2 Vertically and 1 Horizontally
-            else if (Math.Abs(verticalMove) == 2 && Math.Abs(horizontalMove) == 1)
+            if(this.MoveFollowsKnightMovementRules( move ))
             {
                 return true;
             }
 
-            //2 Horizontally and 1 Vertically
-            else if (Math.Abs(verticalMove) == 1 && Math.Abs(horizontalMove) == 2)
-            {
+            return false;
 
-                return true;
-            }
+        }
 
-            else
-            {
-                return false;
-            }
+        private bool MoveFollowsKnightMovementRules( Move move )
+        {
+            if(Math.Abs( move.Vertical ) == 2 && Math.Abs( move.Horizontal ) == 1) return true;
 
+            if(Math.Abs( move.Vertical ) == 1 && Math.Abs( move.Horizontal ) == 2) return true;
+
+            return false;
         }
     }
 }

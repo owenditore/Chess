@@ -17,31 +17,21 @@ namespace ChessClassLibrary
 
         public override bool CheckValidMove(Board board, Position newPosition)
         {
-            Position intermediaryPosition = new Position(-1, -1);
-            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
-            int verticalMove = newPosition.Row - Position.Row;
-            int horizontalMove = newPosition.Column - Position.Column;
 
+            Move move = new Move( this.Position, newPosition );
 
-            if (stateOfNewPosition == Color)
+            if(this.ColorOfPieceAtNewPositionIsMyColor( board, newPosition ))
             {
                 return false;
             }
 
-            else if(Math.Abs( verticalMove ) != Math.Abs( horizontalMove ) || verticalMove == 0)
+            if(move.IsMoveDiagonal())
             {
-                return false;
+                return board.IsPathToNewPositionClear( move );
             }
 
-            else if(this.CheckIfMoveDoesNotHitIntermediatePiecesDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
-            {
-                return true;
-            }
+            return false;
 
-            else
-            {
-                return false;
-            }
         }
 
     }

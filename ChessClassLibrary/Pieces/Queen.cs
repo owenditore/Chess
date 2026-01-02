@@ -7,49 +7,41 @@ namespace ChessClassLibrary
     public class Queen : Piece
     {
 
-        //Constructor
-        public Queen(string name, string color, int row, int col) : base(name, color, row, col)
+        public override bool CheckValidMove( Board board, Position newPosition )
         {
+
+            Move move = new Move( this.Position, newPosition );
+
+            if(this.ColorOfPieceAtNewPositionIsMyColor( board, newPosition ))
+            {
+                return false;
+            }
+
+            if(this.MoveFollowsQueenMovementRules( move ))
+            {
+                return board.IsPathToNewPositionClear( move );
+            }
+
+
+            return false;
 
         }
 
-        //Methods
-
-        public override bool CheckValidMove(Board board, Position newPosition)
+        private bool MoveFollowsQueenMovementRules( Move move )
         {
-            Position intermediaryPosition = new Position(-1, -1);
-            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
-            int verticalMove = newPosition.Row - Position.Row;
-            int horizontalMove = newPosition.Column - Position.Column;
 
-            //No friendly piece at new position
-            if (stateOfNewPosition == Color)
-            {
-                return false;
-            }
+            if(move.IsMoveVertical()) return true;
 
-            //Moves vertically but not horizontally
-            else if (verticalMove != 0 && horizontalMove == 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesVertically( verticalMove, board, intermediaryPosition ))
-            {
-                return true;
-            }
+            else if(move.IsMoveHorizontal()) return true;
 
-            //Moves horizontally but not vertically
-            else if (verticalMove == 0 && horizontalMove != 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesHorizontally( horizontalMove, board, intermediaryPosition ))
-            {
-                return true;
-            }
+            else if(move.IsMoveDiagonal()) return true;
 
-            //Moves diagonally
-            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
-            {
-                return true;
-            }
+            else return false;
 
-            else
-            {
-                return false;
-            }
+        }
+
+        public Queen(string name, string color, int row, int col) : base(name, color, row, col)
+        {
 
         }
 

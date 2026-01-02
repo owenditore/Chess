@@ -9,18 +9,31 @@ namespace ChessClassLibrary
         public int Row { get; set; }
         public int Column { get; set; }
 
-        public Position(int row, int column)
+        public Position( int row, int column )
         {
-            Row = row; 
-            Column = column; 
+            Row = row;
+            Column = column;
         }
 
-        public bool IsEqual(Position otherPosition)
+        public bool IsEqual( Position otherPosition )
         {
             int comparedRow = otherPosition.Row;
             int comparedColumn = otherPosition.Column;
 
             if(this.Row == comparedRow && this.Column == comparedColumn)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsNotEqual( Position otherPosition )
+        {
+            int comparedRow = otherPosition.Row;
+            int comparedColumn = otherPosition.Column;
+
+            if(this.Row != comparedRow || this.Column != comparedColumn)
             {
                 return true;
             }

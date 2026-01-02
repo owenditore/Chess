@@ -10,51 +10,6 @@ namespace ChessClassLibrary
 {
     public class Board
     {
-        public Board()
-        {
-            for(int row = 0; row < 8; row++)
-            {
-                for(int column = 0; column < 8; column++)
-                {
-                    this.Squares.Add( new Square( row, column ) );
-                }
-            }
-        }
-
-        public void CoverToBeCapturedPiece( Position position )
-        {
-            foreach(Piece piece in this.Pieces)
-            {
-                if(piece.Position.IsEqual( position ))
-                {
-                    piece.Covered = true;
-                }
-            }
-        }
-
-        public void UncoverPieces()
-        {
-            foreach(Piece piece in this.Pieces)
-            {
-                if(piece.Covered == true)
-                {
-                    piece.Covered = false;
-                }
-            }
-        }
-
-        public bool IsAttackingTheKingValid()
-        {
-            foreach(Piece piece in this.Pieces)
-            {
-                if(piece.Covered == false && piece.CheckValidMove(this, this.FindKingPosition()))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public void AddAPiece( Piece piece )
         {
             this.Pieces.Add( piece );
@@ -71,6 +26,18 @@ namespace ChessClassLibrary
         public void AddFEN( Board board )
         {
             FENs.Add( new FenNotation( board ) );
+        }
+
+        public bool AnyPieceAllowedToMove()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Color == this.CurrentTurnColor && piece.AllowedToMoveAnywhere( this ) == true)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void Capture( Position givenPosition )
@@ -90,18 +57,6 @@ namespace ChessClassLibrary
             square.Piece = null;
         }
 
-        public bool AnyPieceAllowedToMove()
-        {
-            foreach(Piece piece in this.Pieces)
-            {
-                if(piece.Color == this.Turn && piece.AllowedToMoveAnywhere( this ) == true)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public string CheckForCheckOrStaleMate()
         {
             if(AnyPieceAllowedToMove())
@@ -109,90 +64,73 @@ namespace ChessClassLibrary
                 return "";
             }
 
-            foreach(Piece piece in this.Pieces)
+            if(IsTheKingInCheck())
             {
-                if(piece.Color != Turn && piece.IsKingValidMove( this ))
-                {
-                    return "checkmate";
-                }
+                return "checkmate";
             }
 
             return "stalemate";
         }
 
-        private Dictionary<string, int> CountTypesOfPieces()
+        private Dictionary<string,int> FindNumberOfEachTypeOfPiece()
         {
-            int numberOfQueens = 0;
-            int numberOfRooks = 0;
-            int numberOfPawns = 0;
-            int numberOfWhiteBishops = 0;
-            int numberOfBlackBishops = 0;
-            int numberOfWhiteKnights = 0;
-            int numberOfBlackKnights = 0;
-
-            foreach(Piece piece in Pieces)
+            var numbersOfPieces = new Dictionary<string, int>
             {
-                switch(piece.Name)
-                {
-                    case "queen":
-                        numberOfQueens++;
-                        break;
+                {"queen", this.Pieces.Count( p => p.Name == "queen" ) },
+                {"rook", this.Pieces.Count( p => p.Name == "rook" ) },
+                {"pawn", this.Pieces.Count( p => p.Name == "pawn" ) },
 
-                    case "rook":
-                        numberOfRooks++;
-                        break;
+                {"whiteBishop", this.Pieces.Count( p => p.Name == "bishop" && p.Color == "white" ) },
+                {"blackBishop", this.Pieces.Count( p => p.Name == "bishop" && p.Color == "black" ) },
 
-                    case "pawn":
-                        numberOfPawns++;
-                        break;
-
-                    case "bishop":
-                        if(piece.Color == "white") numberOfWhiteBishops++;
-                        else if(piece.Color == "black") numberOfBlackBishops++;
-                        break;
-
-                    case "knight":
-                        if(piece.Color == "white") numberOfWhiteKnights++;
-                        else if(piece.Color == "black") numberOfBlackKnights++;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            var numberOfPieces = new Dictionary<string, int>
-            {
-                { "queen", numberOfQueens },
-                { "rook", numberOfRooks },
-                { "pawn", numberOfPawns },
-                { "whiteBishop", numberOfWhiteBishops },
-                { "blackBishop", numberOfBlackBishops },
-                { "whiteKnight", numberOfWhiteKnights },
-                { "blackKnight", numberOfBlackKnights }
+                {"whiteKnight", this.Pieces.Count( p => p.Name == "knight" && p.Color == "white" ) },
+                {"blackKnight", this.Pieces.Count( p => p.Name == "knight" && p.Color == "black" ) },
             };
 
-            return numberOfPieces;
+            return numbersOfPieces;
         }
 
         public string CheckForInsufficientMaterial()
         {
-            Dictionary<string, int> numberOfPieces = this.CountTypesOfPieces();
+            var numbersOfPieces = FindNumberOfEachTypeOfPiece();
 
-            if(numberOfPieces["queen"] > 0) return "";
-            if(numberOfPieces["rook"] > 0) return "";
-            if(numberOfPieces["pawn"] > 0) return "";
+            if(EitherPlayerHasAnyQueensRooksOrPawns( numbersOfPieces )) return "";
 
-            if(numberOfPieces["whiteBishop"] > 1) return "";
-            if(numberOfPieces["blackBishop"] > 1) return "";
+            if(EitherPlayerHasTwoBishopsOrTwoKnights( numbersOfPieces )) return "";
 
-            if(numberOfPieces["whiteKnight"] > 1) return "";
-            if(numberOfPieces["blackKnight"] > 1) return "";
-
-            if(numberOfPieces["whiteBishop"] > 0 && numberOfPieces["whiteKnight"] > 0) return "";
-            if(numberOfPieces["blackBishop"] > 0 && numberOfPieces["blackKnight"] > 0) return "";
+            if(EitherPlayerHasABishopAndAKnight( numbersOfPieces )) return "";
 
             return "draw";
+        }
+
+        private bool EitherPlayerHasAnyQueensRooksOrPawns( Dictionary<string,int> numbersOfPieces )
+        {
+
+            int totalQRPs = numbersOfPieces["pawn"] + numbersOfPieces["rook"] + numbersOfPieces["queen"];
+
+            if(totalQRPs != 0) 
+                return true;
+
+            return false;
+        }
+        private bool EitherPlayerHasTwoBishopsOrTwoKnights( Dictionary<string, int> numbersOfPieces )
+        {
+
+            if(numbersOfPieces["whiteKnight"] > 1) return true;
+            if(numbersOfPieces["blackKnight"] > 1) return true;
+            if(numbersOfPieces["whiteBishop"] > 1) return true;
+            if(numbersOfPieces["blackBishop"] > 1) return true;
+
+            return false;
+
+        }
+        private bool EitherPlayerHasABishopAndAKnight( Dictionary<string, int> numbersOfPieces )
+        {
+
+            if(numbersOfPieces["whiteKnight"] + numbersOfPieces["whiteBishop"] > 1) return true;
+            if(numbersOfPieces["blackKnight"] + numbersOfPieces["blackBishop"] > 1) return true;
+
+            return false;
         }
 
         public string CheckForMateOrDraw()
@@ -213,24 +151,37 @@ namespace ChessClassLibrary
             return "";
         }
 
+        public void CheckForPawnToPromote()
+        {
+
+            Piece? pawnToPromote = this.Pieces.FirstOrDefault( p => p.NeedToPromote() == true );
+
+            if(pawnToPromote != null)
+            {
+                this.APawnNeedsToPromote = true;
+            }
+
+        }
+
         public string CheckForPiece( Position position )
         {
-            foreach(Piece piece in Pieces)
-            {
-                if(piece.Position.IsEqual( position ) == true && piece.Covered == false)
-                {
-                    return piece.Color;
-                }
+            Piece? piece = this.Pieces.FirstOrDefault( p =>
+                p.Covered == false &&
+                p.Position.IsEqual( position )
+            );
 
-            }
+            if(piece != null)
+                return piece.Color;
+
             return "none";
+
         }
 
         public Piece CheckForPieceToPromoteTo( Position clickedPosition )
         {
             Piece? pieceToPromoteTo = this.PromotionList.FirstOrDefault( p =>
                 p.Position.IsEqual( clickedPosition ) &&
-                p.Color == this.Turn
+                p.Color == this.CurrentTurnColor
             );
 
             return pieceToPromoteTo;
@@ -247,26 +198,13 @@ namespace ChessClassLibrary
             return promoteFromPiece;
         }
 
-        public void CheckForPromotion()
+        public void CoverToBeCapturedPiece( Position position )
         {
-            Piece? whitePawnToPromote = this.Pieces.FirstOrDefault( p =>
-                p.Color == this.Turn &&
-                p.Color == "white" &&
-                p.Name == "pawn" &&
-                p.Position.Row == 0
-            );
+            Piece? piece = this.Pieces.FirstOrDefault(p => p.Position.IsEqual( position ));
 
-            Piece? blackPawnToPromote = this.Pieces.FirstOrDefault( p =>
-                p.Color == this.Turn &&
-                p.Color == "black" &&
-                p.Name == "pawn" &&
-                p.Position.Row == 0
-            );
+            if(piece != null)
+                piece.Covered = true;
 
-            if(whitePawnToPromote != null || blackPawnToPromote != null)
-            {
-                NeedToPromote = true;
-            }
         }
 
         public void CreatePromotionList()
@@ -295,41 +233,53 @@ namespace ChessClassLibrary
 
         public Position FindKingPosition()
         {
-            foreach(Piece piece in Pieces)
-            {
-                if(piece.Name == "king" && piece.Color == Turn)
-                {
-                    return piece.Position;
-                }
-            }
-            return null;
+            Piece? king = this.Pieces.FirstOrDefault(p => 
+                p.Name == "king" &&
+                p.Color == this.CurrentTurnColor
+            );
+
+            return king.Position;
         }
 
-        public string NameOfPiece( Position position )
+        public bool IsPathToNewPositionClear( Move move )
         {
-            foreach(Piece piece in Pieces)
+            string direction = move.IsMoveVerticalHorizontalOrDiagonal();
+
+            switch(direction)
             {
-                int posRow = position.Row;
-                int posCol = position.Column;
-                int pieceRow = piece.Position.Row;
-                int pieceCol = piece.Position.Column;
+                case "vertical":
+                    return IsVerticalPathToNewPositionClear( move );
 
-                if(pieceRow == posRow && pieceCol == posCol)
-                {
-                    if(piece.Covered == false)
-                        return piece.Name;
-                }
 
+                case "horizontal":
+                    return IsHorizontalPathToNewPositionClear( move );
+
+
+                case "diagonal":
+                    return IsDiagonalPathToNewPositionClear( move );
             }
-            return null;
+
+            return false;
+        }
+
+        public bool IsTheKingInCheck()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Covered == false && piece.CheckValidMove( this, this.FindKingPosition() ))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void NextTurn()
         {
-            if(Turn == "white")
-                Turn = "black";
+            if(CurrentTurnColor == "white")
+                CurrentTurnColor = "black";
             else
-                Turn = "white";
+                CurrentTurnColor = "white";
         }
 
         public void PromotePiece( Piece promotablePiece, Piece promoteToPiece )
@@ -355,17 +305,12 @@ namespace ChessClassLibrary
             this.Capture( promotablePiece );
         }
 
-        public Move ReturnLastMove( Board board )
+        public Turn ReturnLastTurn( Board board )
         {
-            int numberOfMoves = board.Moves.Count();
-            foreach(Move move in board.Moves)
-            {
-                if(move.Number == numberOfMoves)
-                {
-                    return move;
-                }
-            }
-            return null;
+            int numberOfTurns = board.Turns.Count();
+
+            return board.Turns.FirstOrDefault(t => t.Number == numberOfTurns );
+
         }
 
         public void SetupGame()
@@ -449,6 +394,17 @@ namespace ChessClassLibrary
 
         }
 
+        public void UncoverPieces()
+        {
+            foreach(Piece piece in this.Pieces)
+            {
+                if(piece.Covered == true)
+                {
+                    piece.Covered = false;
+                }
+            }
+        }
+
         public Piece WhatPieceIsHere( Position newPosition )
         {
             Piece? piece = this.Pieces.FirstOrDefault( p =>
@@ -458,13 +414,97 @@ namespace ChessClassLibrary
             return piece;
         }
 
+        private bool IsDiagonalPathToNewPositionClear( Move move )
+        {
+            if(Math.Abs( move.Vertical ) == 1) return true;
+
+            Position intermediaryPosition = new Position( -1, -1 );
+            int verticalMoveLength = move.Vertical;
+            int horizontalMoveLength = move.Horizontal;
+            do
+            {
+                verticalMoveLength = move.DistanceCloserToZero( verticalMoveLength );
+                horizontalMoveLength = move.DistanceCloserToZero( horizontalMoveLength );
+                intermediaryPosition.Row = verticalMoveLength + move.StartingPosition.Row;
+                intermediaryPosition.Column = horizontalMoveLength + move.StartingPosition.Column;
+                string stateOfIntermediaryPosition = this.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( verticalMoveLength ) != 1);
+
+            return true;
+        }
+
+        private bool IsHorizontalPathToNewPositionClear( Move move )
+        {
+            if(Math.Abs( move.Horizontal ) == 1) return true;
+
+            Position intermediaryPosition = new Position( -1, -1 );
+            int moveLength = move.Horizontal;
+            do
+            {
+                moveLength = move.DistanceCloserToZero( moveLength );
+                intermediaryPosition.Row = move.StartingPosition.Row;
+                intermediaryPosition.Column = moveLength + move.StartingPosition.Column;
+                string stateOfIntermediaryPosition = this.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( moveLength ) != 1);
+
+            return true;
+        }
+
+        private bool IsVerticalPathToNewPositionClear( Move move )
+        {
+            if(Math.Abs( move.Vertical ) == 1) return true;
+
+            Position intermediaryPosition = new Position( -1, -1 );
+            int moveLength = move.Vertical;
+            do
+            {
+                moveLength = move.DistanceCloserToZero( moveLength );
+                intermediaryPosition.Row = moveLength + move.StartingPosition.Row;
+                intermediaryPosition.Column = move.StartingPosition.Column;
+                string stateOfIntermediaryPosition = this.CheckForPiece( intermediaryPosition );
+                if(stateOfIntermediaryPosition != "none")
+                {
+                    return false;
+                }
+
+            } while(Math.Abs( moveLength ) != 1);
+
+            return true;
+        }
+
+        public bool APawnNeedsToPromote { get; set; } = false;
+
+        public string CurrentTurnColor { get; set; } = "white";
+
         public List<FenNotation> FENs { get; set; } = new List<FenNotation>();
-        public List<Move> Moves { get; set; } = new List<Move>();
-        public bool NeedToPromote { get; set; } = false;
+
         public List<Piece> Pieces { get; set; } = new List<Piece>();
 
         public List<Piece> PromotionList { get; set; } = new List<Piece>();
+
         public List<Square> Squares { get; set; } = new List<Square>();
-        public string Turn { get; set; } = "white";
+
+        public List<Turn> Turns { get; set; } = new List<Turn>();
+
+        public Board()
+        {
+            for(int row = 0; row < 8; row++)
+            {
+                for(int column = 0; column < 8; column++)
+                {
+                    this.Squares.Add( new Square( row, column ) );
+                }
+            }
+        }
     }
 }

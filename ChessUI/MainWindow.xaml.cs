@@ -73,44 +73,49 @@ namespace ChessUI
                 pieceImages[row, column].Source = Images.GetImage( piece );
             }
         }
+
         private void AssignHighlights()
         {
             foreach(var square in board.Squares)
             {
                 if(selectedPiece.AllowedToMove( board, square.Position ))
                 {
-                    if(square.Piece != null)
-                    {
-                        highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "capture" );
-                    }
-                    else
-                    {
-                        highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "empty" );
-                    }
+                    DetermineAndDisplayHighlight( square );
                 }
+            }
+        }
+
+        private void DetermineAndDisplayHighlight( Square square )
+        {
+            if(square.Piece != null)
+            {
+                highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "capture" );
+            }
+            else
+            {
+                highlights[square.Position.Row, square.Position.Column].Source = Images.GetHighlightImage( "empty" );
             }
         }
 
         private void AttemptToMovePieceToNewPosition( Position newPosition )
         {
-            if(selectedPiece.AllowedToMove( board, newPosition ))
-            {
-                selectedPiece.Move( board, newPosition );
-                this.DrawBoard();
-
-                if(board.NeedToPromote == true)
-                {
-                    this.DrawPromotionChoices( board );
-                    return;
-                }
-
-                EndTurn();
-            }
-            else
+            if(selectedPiece.AllowedToMove( board, newPosition ) == false)
             {
                 this.DeselectPiece();
                 this.ClearBoardHighlights();
             }
+
+            selectedPiece.MovePiece( board, newPosition );
+            this.DrawBoard();
+
+            if(board.APawnNeedsToPromote == true)
+            {
+                this.DrawPromotionChoices( board );
+                return;
+            }
+
+            EndTurn();
+
         }
 
         private void BoardGrid_MouseDown( object sender, MouseButtonEventArgs e )
@@ -118,7 +123,7 @@ namespace ChessUI
             System.Windows.Point clickedPoint = e.GetPosition( BoardGrid );
             Position clickedPosition = this.ToSquarePosition( clickedPoint );
 
-            if(board.NeedToPromote)
+            if(board.APawnNeedsToPromote)
             {
                 this.Promotion( clickedPosition );
             }
@@ -202,7 +207,7 @@ namespace ChessUI
         {
             foreach(var piece in board.PromotionList)
             {
-                if(piece.Color == board.Turn)
+                if(piece.Color == board.CurrentTurnColor)
                 {
                     int row = piece.Position.Row;
                     int column = piece.Position.Column;
@@ -244,7 +249,7 @@ namespace ChessUI
             {
 
                 board.PromotePiece( promotablePiece, promoteToPiece );
-                board.NeedToPromote = false;
+                board.APawnNeedsToPromote = false;
                 this.EndTurn();
 
             }
@@ -254,7 +259,7 @@ namespace ChessUI
         {
             selectedPiece = piece;
 
-            if(selectedPiece.Color != board.Turn)
+            if(selectedPiece.Color != board.CurrentTurnColor)
             {
                 this.DeselectPiece();
                 return;
@@ -266,7 +271,6 @@ namespace ChessUI
         {
             foreach(var piece in board.Pieces)
             {
-
                 if(piece.Position.IsEqual( clickedPosition ))
                 {
                     this.SetPositionAndPieceIfCorrectTurn( piece, clickedPosition );

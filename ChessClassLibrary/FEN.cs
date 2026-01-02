@@ -23,7 +23,7 @@ namespace ChessClassLibrary
         {
             GeneratePieceStrings( board );
             GenerateMainSequence();
-            AddCurrentTurn( board );
+            AddCurrentTurnColor( board );
             AddCastlingAvailability( board );
             //AddEnPassantSquare(board);
             //Half move clock
@@ -33,19 +33,19 @@ namespace ChessClassLibrary
 
         private void AddEnPassantSquare( Board board )
         {
-            Move? lastMove = board.Moves.FirstOrDefault( p =>
-                p.Number == board.Moves.Count &&
+            Turn? lastTurn = board.Turns.FirstOrDefault( p =>
+                p.Number == board.Turns.Count &&
                 p.EndingPosition.Row != p.CapturedPiece.Position.Row &&
                 p.EndingPosition.Column != p.CapturedPiece.Position.Column &&
                 p.CapturedPiece != null
             );
-            if(lastMove == null)
+            if(lastTurn == null)
             {
                 fen = fen + " -";
             }
             else
             {
-                int colPosition = lastMove.EndingPosition.Column;
+                int colPosition = lastTurn.EndingPosition.Column;
                 string colPositionString = "";
                 switch(colPosition)
                 {
@@ -83,7 +83,7 @@ namespace ChessClassLibrary
 
                 }
 
-                int rowPosition = Math.Abs( lastMove.EndingPosition.Row - lastMove.StartingPosition.Row );
+                int rowPosition = Math.Abs( lastTurn.EndingPosition.Row - lastTurn.StartingPosition.Row );
                 string rowPositionString = rowPosition.ToString();
                 string enPassantPositonString = colPositionString + rowPositionString;
 
@@ -206,9 +206,9 @@ namespace ChessClassLibrary
         }
 
 
-        private void AddCurrentTurn( Board board )
+        private void AddCurrentTurnColor( Board board )
         {
-            string turn = board.Turn;
+            string turn = board.CurrentTurnColor;
             string turnLetter = "";
             if(turn == "white")
                 turnLetter = "w";

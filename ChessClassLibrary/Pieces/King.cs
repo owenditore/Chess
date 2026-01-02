@@ -7,89 +7,78 @@ namespace ChessClassLibrary
     public class King : Piece
     {
 
-        //Constructor
-        public King(string name, string color, int row, int col) : base(name, color, row, col)
+        public override bool CheckValidMove( Board board, Position newPosition )
         {
 
-        }
+            Move move = new Move( this.Position, newPosition );
 
-        //Methods
-
-        public override bool CheckValidMove(Board board, Position newPosition)
-        {
-            Position intermediaryPosition = new Position(-1, -1);
-            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
-            int verticalMove = newPosition.Row - Position.Row;
-            int horizontalMove = newPosition.Column - Position.Column;
-
-            //No friendly piece at new position
-            if (stateOfNewPosition == Color)
+            if(this.ColorOfPieceAtNewPositionIsMyColor( board, newPosition ))
             {
                 return false;
             }
 
-            //Can Move 1 space away in any direction
-            else if (Math.Abs(verticalMove) <= 1 && Math.Abs(horizontalMove) <= 1)
+            if(this.CheckIfNormalMoveIsValid( move ))
             {
                 return true;
             }
 
-            //Castling
-            else if (HasMoved == false)
+            if(this.CheckIfMoveIsAValidCastleMove( move, board ))
             {
-                if (Math.Abs(horizontalMove) == 2 && verticalMove ==0)
-                {
-                    foreach(Piece piece in board.Pieces)
-                    {
-                        if (piece.Name == "rook" && piece.Color == Color)
-                        {
-                            int castleRookRowPosition = Position.Row;
-                            int castleRookColumnPosition = -1;
-                            if (horizontalMove > 0)
-                            {
-                                castleRookColumnPosition = Position.Column + 3;
-                            }
-                            else if (horizontalMove < 0)
-                            {
-                                castleRookColumnPosition = Position.Column - 4; ;
-                            }
-
-                            if (piece.Position.Row ==  castleRookRowPosition && piece.Position.Column == castleRookColumnPosition)
-                            {
-                                if (piece.HasMoved == false)
-                                {
-                                    do
-                                    {
-                                        if (castleRookColumnPosition < 4)
-                                            castleRookColumnPosition++;
-                                        else if (castleRookColumnPosition > 4)
-                                            castleRookColumnPosition--;
-
-                                        intermediaryPosition.Column = castleRookColumnPosition;
-                                        intermediaryPosition.Row = castleRookRowPosition;
-                                        string stateOfIntermediaryPosition = board.CheckForPiece(intermediaryPosition);
-                                        if (stateOfIntermediaryPosition != "none")
-                                        {
-                                            return false;
-                                        }
-                                    } while (Math.Abs(Position.Column - castleRookColumnPosition) != 1);
-                                    return true;
-                                }
-                            }
-
-
-                        }
-                    }
-                }
+                return board.IsPathToNewPositionClear( move );
             }
 
-            else
-            { 
-                return false; 
-            }
             return false;
 
         }
 
+        private bool CheckIfNormalMoveIsValid( Move move )
+        {
+            if(Math.Abs(move.Vertical) > 1)
+                return false;
+
+            if(Math.Abs( move.Horizontal ) > 1)
+                return false;
+
+            return true;
+        }
+
+        private bool CheckIfMoveIsAValidCastleMove( Move move, Board board )
+        {
+            if(this.HasMoved == true)
+                return false;
+
+            if(Math.Abs( move.Horizontal ) != 2)
+                return false;
+
+            if(move.Vertical != 0)
+                return false;
+
+
+            int targetRookColumn;
+
+            if(move.Horizontal > 0)
+            {
+                targetRookColumn = 7;
+            }
+            else
+            {
+                targetRookColumn = 0;
+            }
+
+            Position targetRookPosition = new Position( this.Position.Row, targetRookColumn );
+
+            Piece? rook = board.Pieces.FirstOrDefault( r => r.IsARookThatCanCastle( targetRookPosition ) );
+
+            if(rook != null)
+                return true;
+
+            return false;
+
+        }
+
+        public King( string name, string color, int row, int col ) : base( name, color, row, col )
+        {
+
+        }
     }
 }

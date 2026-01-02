@@ -6,89 +6,64 @@ namespace ChessClassLibrary
 {
     public class Move
     {
-        //Properties
+
+        public int Vertical { get; set; }
+
+        public int Horizontal { get; set; }
+
+
         public Position StartingPosition { get; set; }
 
         public Position EndingPosition { get; set; }
 
-        public Piece Piece { get; set; }
-
-        public Piece CapturedPiece { get; set; }
-
-        public bool Castle { get; set;  }
-
-        public string Notation { get; set; }
-
-        public int Number {  get; set; } = 0;
-
-
-        //Constructors
-
-        public Move(int number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public Move( Position startingPosition, Position endingPosition )
         {
-            this.Number = number;
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
-            this.Piece = movedPiece;
-            this.CapturedPiece = capturedPiece;
-            GenerateNotation();
-        }
-        public Move(Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
-        {
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
-            this.Piece = movedPiece;
-            this.CapturedPiece = capturedPiece;
-            GenerateNotation();
+            this.StartingPosition = startingPosition;
+            this.EndingPosition = endingPosition;
+            this.Vertical = endingPosition.Row - startingPosition.Row;
+            this.Horizontal = endingPosition.Column - startingPosition.Column;
         }
 
-        public Move(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn, bool castle)
+        public string IsMoveVerticalHorizontalOrDiagonal()
         {
-            this.Number = number;
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
-            this.Piece = movedPiece;
-            this.Castle = castle;
-            GenerateNotation();
+            if(this.IsMoveVertical()) return "vertical";
+
+            if(this.IsMoveHorizontal()) return "horizontal";
+
+            if(this.IsMoveDiagonal()) return "diagonal";
+
+            return "none";
         }
 
-        public Move( int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public bool IsMoveVertical()
         {
-            this.Number = number;
-            this.StartingPosition = new Position( startRow, startColumn );
-            this.EndingPosition = new Position( endRow, endColumn );
-            this.Piece = movedPiece;
-            GenerateNotation();
+            if(this.Vertical != 0 && this.Horizontal == 0) return true;
+            return false;
+        }
+        public bool IsMoveHorizontal()
+        {
+            if(this.Vertical == 0 && this.Horizontal != 0) return true;
+            return false;
+        }
+        public bool IsMoveDiagonal()
+        {
+            if(Math.Abs(this.Vertical) == Math.Abs(this.Horizontal) && this.Vertical != 0) return true;
+            return false;
         }
 
-        public Move(Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
+        public int DistanceCloserToZero( int number )
         {
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
-            this.Piece = movedPiece;
-            GenerateNotation();
+            if(number > 0)
+            {
+                return number - 1;
+            }
+            else if(number < 0)
+            {
+                return number + 1;
+            }
+            else
+                return number;
         }
 
-        public Move(Piece piece, Piece capturedPiece, Position startingPosition, Position endingPosition)
-        {
-            this.StartingPosition = new Position(startingPosition.Row, startingPosition.Column);
-            this.EndingPosition = new Position(endingPosition.Row, endingPosition.Column);
-            this.Piece = piece;
-            this.CapturedPiece = capturedPiece;
-            GenerateNotation();
-        }
-
-        public Move(Piece piece, Position startingPosition, Position endingPosition)
-        {
-            this.StartingPosition = new Position(startingPosition.Row, startingPosition.Column);
-            this.EndingPosition = new Position(endingPosition.Row, endingPosition.Column);
-            this.Piece = piece;
-            GenerateNotation();
-        }
-
-        public void GenerateNotation()
-        {
-
-        }
     }
 }
