@@ -26,7 +26,7 @@ namespace ChessClassLibrary
         }
 
 
-        protected bool CheckIfPieceCanMoveVertically( int move, Board board, Position intermediaryPosition )
+        protected bool CheckIfMoveDoesNotHitIntermediatePiecesVertically( int move, Board board, Position intermediaryPosition )
         {
             if(Math.Abs( move ) == 1)
             {
@@ -49,7 +49,7 @@ namespace ChessClassLibrary
             return true;
         }
 
-        protected bool CheckIfPieceCanMoveDiagonally( int verticalMove, int horizontalMove, Board board, Position intermediaryPosition )
+        protected bool CheckIfMoveDoesNotHitIntermediatePiecesDiagonally( int verticalMove, int horizontalMove, Board board, Position intermediaryPosition )
         {
             if(Math.Abs( verticalMove ) == 1)
             {
@@ -74,7 +74,7 @@ namespace ChessClassLibrary
             return true;
         }
 
-        protected bool CheckIfPieceCanMoveHorizontally( int move, Board board, Position intermediaryPosition )
+        protected bool CheckIfMoveDoesNotHitIntermediatePiecesHorizontally( int move, Board board, Position intermediaryPosition )
         {
             if(Math.Abs( move ) == 1)
             {
@@ -150,12 +150,12 @@ namespace ChessClassLibrary
         public bool CheckIfMovePutsSelfInCheck( Board board, Position newPosition )
         {
 
-            Position oldPosition = new Position( Position.Row, Position.Column );
+            Position oldPosition = new Position( this.Position.Row, this.Position.Column );
 
             board.CoverToBeCapturedPiece( newPosition );
 
             //If this piece is a king and is trying to Castle
-            if(this.Name == "king" && Math.Abs( Position.Column - newPosition.Column ) == 2)
+            if(this.Name == "king" && Math.Abs( this.Position.Column - newPosition.Column ) == 2)
             {
                 if(CheckIfKingIsCastlingThroughCheck( board, newPosition, oldPosition ))
                 {
@@ -164,8 +164,8 @@ namespace ChessClassLibrary
                 }
             }
 
-            Position.Row = newPosition.Row;
-            Position.Column = newPosition.Column;
+            this.Position.Row = newPosition.Row;
+            this.Position.Column = newPosition.Column;
 
             if(board.IsAttackingTheKingValid())
             {

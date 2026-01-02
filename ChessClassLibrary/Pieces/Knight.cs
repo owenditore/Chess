@@ -30,11 +30,8 @@ namespace ChessClassLibrary
             //2 Vertically and 1 Horizontally
             else if (Math.Abs(verticalMove) == 2 && Math.Abs(horizontalMove) == 1)
             {
-
                 return true;
             }
-
-
 
             //2 Horizontally and 1 Vertically
             else if (Math.Abs(verticalMove) == 1 && Math.Abs(horizontalMove) == 2)
@@ -44,10 +41,10 @@ namespace ChessClassLibrary
             }
 
             else
+            {
                 return false;
-
+            }
 
         }
-
     }
 }

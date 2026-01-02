@@ -29,19 +29,19 @@ namespace ChessClassLibrary
             }
 
             //Moves vertically but not horizontally
-            else if (verticalMove != 0 && horizontalMove == 0 && CheckIfPieceCanMoveVertically( verticalMove, board, intermediaryPosition ))
+            else if (verticalMove != 0 && horizontalMove == 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesVertically( verticalMove, board, intermediaryPosition ))
             {
                 return true;
             }
 
             //Moves horizontally but not vertically
-            else if (verticalMove == 0 && horizontalMove != 0 && CheckIfPieceCanMoveHorizontally( horizontalMove, board, intermediaryPosition ))
+            else if (verticalMove == 0 && horizontalMove != 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesHorizontally( horizontalMove, board, intermediaryPosition ))
             {
                 return true;
             }
 
             //Moves diagonally
-            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0 && CheckIfPieceCanMoveDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
+            else if (Math.Abs(verticalMove) == Math.Abs(horizontalMove) && verticalMove != 0 && this.CheckIfMoveDoesNotHitIntermediatePiecesDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
             {
                 return true;
             }

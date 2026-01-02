@@ -32,12 +32,12 @@ namespace ChessClassLibrary
                 return false;
             }
 
-            else if(CheckIfPieceCanMoveVertically( verticalMove, board, intermediaryPosition ))
+            else if(this.CheckIfMoveDoesNotHitIntermediatePiecesVertically( verticalMove, board, intermediaryPosition ))
             {
                 return true;
             }
 
-            else if(CheckIfPieceCanMoveHorizontally( horizontalMove, board, intermediaryPosition ))
+            else if(this.CheckIfMoveDoesNotHitIntermediatePiecesHorizontally( horizontalMove, board, intermediaryPosition ))
             {
                 return true;
             }

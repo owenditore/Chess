@@ -33,7 +33,7 @@ namespace ChessClassLibrary
                 return false;
             }
 
-            else if(CheckIfPieceCanMoveDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
+            else if(this.CheckIfMoveDoesNotHitIntermediatePiecesDiagonally( verticalMove, horizontalMove, board, intermediaryPosition ))
             {
                 return true;
             }

@@ -9,130 +9,181 @@ namespace ChessClassLibrary
     {
 
         //Constructor
-        public Pawn(string name, string color, int row, int col) : base(name, color, row, col)
+        public Pawn( string name, string color, int row, int col ) : base( name, color, row, col )
         {
 
         }
 
         //Methods
 
-        public override bool CheckValidMove(Board board, Position newPosition)
+        private bool CheckIfMoveIsForward( int verticalMove )
         {
-            Position intermediaryPosition = new Position(-1, -1);
-            string stateOfNewPosition = board.CheckForPiece(newPosition); //white,black,none
-            int verticalMove = newPosition.Row - Position.Row;
-            int horizontalMove = newPosition.Column - Position.Column;
-
-            switch (Color)
+            switch(this.Color)
             {
                 case "white":
-                    //Normal Move
-                    if (verticalMove == -1 && horizontalMove == 0 && stateOfNewPosition == "none")
+                    if(verticalMove < 0)
                         return true;
-
-                    //First Move 
-                    else if (verticalMove == -2 && horizontalMove == 0 && stateOfNewPosition == "none" && HasMoved == false)
-                    {
-                        intermediaryPosition.Row = Position.Row - 1;
-                        intermediaryPosition.Column = Position.Column;
-                        if (board.CheckForPiece(intermediaryPosition) == "none")
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-
-                    //Capture
-                    else if (verticalMove == -1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "black")
-                    {
-                        return true;
-                    }
-
-                    //En Passant ??
-
-                    else if (verticalMove == -1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "none")
-                    {
-                        int enPassantRow = newPosition.Row + 1;
-                        int enPassantCol = newPosition.Column;
-                        int enPassantStartingRow = enPassantRow - 2;
-                        int enPassantStartingCol = enPassantCol;
-
-                        Position enPassantPosition = new Position(enPassantRow, enPassantCol);
-                        if (board.CheckForPiece(enPassantPosition) == "black"  && board.NameOfPiece(enPassantPosition) == "pawn")
-                        {
-                            Move lastMove = board.ReturnLastMove(board);
-
-                            if (lastMove.Piece.Name == "pawn" && lastMove.Piece.Color == "black" && lastMove.EndingPosition.Row == enPassantRow && lastMove.EndingPosition.Column == enPassantCol)
-                            {
-                                if (lastMove.StartingPosition.Row == enPassantStartingRow && lastMove.StartingPosition.Column == enPassantStartingCol)
-                                {
-                                    return true;
-                                }
-                            }
-
-                        }
-                    }
-
-                    return false;
-
+                    break;
 
                 case "black":
-                    //Normal Move
-                    if (verticalMove == 1 && horizontalMove == 0 && stateOfNewPosition == "none")
+                    if(verticalMove > 0)
                         return true;
-
-                    //First Move
-                    else if (verticalMove == 2 && horizontalMove == 0 && stateOfNewPosition == "none" && HasMoved == false)
-                    {
-                        intermediaryPosition.Row = Position.Row + 1;
-                        intermediaryPosition.Column = Position.Column;
-                        if (board.CheckForPiece(intermediaryPosition) == "none")
-                            return true;
-                        else
-                            return false;
-                    }
-
-                    //Capture
-                    else if (verticalMove == 1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "white")
-                    {
-                        return true;
-                    }
-
-                    //En Passant?
-
-                    else if (verticalMove == 1 && Math.Abs(horizontalMove) == 1 && stateOfNewPosition == "none")
-                    {
-                        int enPassantRow = newPosition.Row - 1;
-                        int enPassantCol = newPosition.Column;
-                        int enPassantStartingRow = enPassantRow + 2;
-                        int enPassantStartingCol = enPassantCol;
-
-                        Position enPassantPosition = new Position(enPassantRow, enPassantCol);
-                        if (board.CheckForPiece(enPassantPosition) == "white" && board.NameOfPiece(enPassantPosition) == "pawn")
-                        {
-                            Move lastMove = board.ReturnLastMove(board);
-
-                            if (lastMove.Piece.Name == "pawn" && lastMove.Piece.Color == "white" && lastMove.EndingPosition.Row == enPassantRow && lastMove.EndingPosition.Column == enPassantCol)
-                            {
-                                if (lastMove.StartingPosition.Row == enPassantStartingRow && lastMove.StartingPosition.Column == enPassantStartingCol)
-                                {
-                                    return true;
-                                }
-                            }
-
-                        }
-                    }
-
-
-                    return false;
-
+                    break;
             }
+
             return false;
         }
 
+        private bool CheckNormalMove( int verticalMove, int horizontalMove, string stateOfNewPosition )
+        {
+            if(Math.Abs( verticalMove ) == 1 && horizontalMove == 0 && stateOfNewPosition == "none")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool CheckFirstMove( int verticalMove, int horizontalMove, string stateOfNewPosition, Board board )
+        {
+            if(Math.Abs( verticalMove ) == 2 && horizontalMove == 0 && stateOfNewPosition == "none" && this.HasMoved == false)
+            {
+                Position intermediaryPosition = new Position( this.Position.Row + MoveCloserToZero( verticalMove ), this.Position.Column );
+                if( board.CheckForPiece(intermediaryPosition) == "none")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
+        }
+
+        private bool CaptureMove( int verticalMove, int horizontalMove, string stateOfNewPosition )
+        {
+            if(Math.Abs( verticalMove ) == 1 && Math.Abs( horizontalMove ) == 1 && stateOfNewPosition == this.OpponentColor)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool EnPassantMove( int verticalMove, int horizontalMove, string stateOfNewPosition, Position newPosition, Board board )
+        {
+            if(Math.Abs( verticalMove ) == 1 && Math.Abs( horizontalMove ) == 1 && stateOfNewPosition == "none")
+            {
+
+                int enPassantRow = -1;
+                int enPassantStartingRow = -1;
+                int enPassantCol = newPosition.Column;
+                int enPassantStartingCol = newPosition.Column;
+
+                switch(this.Color)
+                {
+                    case "white":
+                        enPassantRow = newPosition.Row + 1;
+                        enPassantStartingRow = enPassantRow - 2;
+                        break;
+
+                    case "black":
+                        enPassantRow = newPosition.Row - 1;
+                        enPassantStartingRow = enPassantRow + 2;
+                        break;
+                }
+
+                Position enPassantPosition = new Position( enPassantRow, enPassantCol );
+                Move lastMove = board.ReturnLastMove( board );
+
+                if(board.CheckForPiece( enPassantPosition ) == this.OpponentColor && board.NameOfPiece( enPassantPosition ) == "pawn")
+                {
+
+                    if(lastMove.Piece.Name == "pawn" && lastMove.Piece.Color == this.OpponentColor && lastMove.EndingPosition.Row == enPassantRow && lastMove.EndingPosition.Column == enPassantCol)
+                    {
+                        if(lastMove.StartingPosition.Row == enPassantStartingRow && lastMove.StartingPosition.Column == enPassantStartingCol)
+                        {
+                            return true;
+                        }
+                    }
+
+                }
+            }
+            return false;
+
+        }
+
+        private bool CheckIfUniversalPawnRulesAreValid( int verticalMove, int horizontalMove, string stateOfNewPosition )
+        {
+            if(stateOfNewPosition == this.Color)
+            {
+                return false;
+            }
+
+            else if(CheckIfMoveIsForward( verticalMove ) == false)
+            {
+                return false;
+            }
+
+            else
+            {
+                return true;
+            }
+        }
+
+        private bool CheckIfAnyPawnMoveTypeIsValid( int verticalMove, int horizontalMove, string stateOfNewPosition, Position newPosition, Board board )
+        {
+
+            if(this.CheckNormalMove( verticalMove, horizontalMove, stateOfNewPosition ))
+            {
+                return true;
+            }
+
+            else if(this.CheckFirstMove( verticalMove, horizontalMove, stateOfNewPosition, board ))
+            {
+                return true;
+            }
+
+            else if(this.CaptureMove( verticalMove, horizontalMove, stateOfNewPosition ))
+            {
+                return true;
+            }
+
+            else if(this.EnPassantMove( verticalMove, horizontalMove, stateOfNewPosition, newPosition, board ))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        public override bool CheckValidMove( Board board, Position newPosition )
+        {
+            string stateOfNewPosition = board.CheckForPiece( newPosition ); //white,black,none
+            int verticalMove = newPosition.Row - Position.Row;
+            int horizontalMove = newPosition.Column - Position.Column;
+
+            if(CheckIfUniversalPawnRulesAreValid( verticalMove, horizontalMove, stateOfNewPosition ) == false)
+            {
+                return false;
+            }
+
+            else if(CheckIfAnyPawnMoveTypeIsValid( verticalMove, horizontalMove, stateOfNewPosition, newPosition, board ))
+            {
+                return true;
+            }
+
+            else
+            {
+                return false;
+            }
+        }
 
     }
 }
