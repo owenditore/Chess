@@ -39,7 +39,7 @@ namespace ChessClassLibrary
             Position oldPosition = new Position( this.Position.Row, this.Position.Column );
 
             //Covering a Piece that is about to be capture let's the object check if the king is in check without considering the covered piece. If it is in check you then uncover
-            board.CoverToBeCapturedPiece( newPosition );
+            Piece? toBeCapturedPiece = board.TemporarilyRemoveToBeCapturedPiece( newPosition );
 
             if(this.PieceIsKingTryingToCastle( newPosition ))
             {
@@ -49,17 +49,18 @@ namespace ChessClassLibrary
                 }
             }
 
+            this.MoveSquare( board, newPosition );
             this.Position.Row = newPosition.Row;
             this.Position.Column = newPosition.Column;
 
             if(board.IsTheKingInCheck())
             {
-                ResetPiecePosition( board, oldPosition );
+                ResetPiecePosition( board, oldPosition, toBeCapturedPiece );
                 return true;
             }
             else
             {
-                ResetPiecePosition( board, oldPosition );
+                ResetPiecePosition( board, oldPosition, toBeCapturedPiece );
                 return false;
             }
 
@@ -70,13 +71,11 @@ namespace ChessClassLibrary
             return false;
         }
 
-        public bool IsARookThatCanCastle( Position targetRookPosition )
+        public bool IsARookThatCanCastle()
         {
             if(this.Name != "rook") return false;
 
             if(this.HasMoved) return false;
-
-            if(this.Position.IsNotEqual( targetRookPosition )) return false;
 
             return true;
         }
@@ -120,8 +119,7 @@ namespace ChessClassLibrary
             else
                 intermediateKingPosition.Column = this.Position.Column + 1;
 
-            this.Position.Row = intermediateKingPosition.Row;
-            this.Position.Column = intermediateKingPosition.Column;
+            this.MoveSquare( board, newPosition );
 
             if(board.IsTheKingInCheck())
             {
@@ -133,58 +131,50 @@ namespace ChessClassLibrary
             return false;
         }
 
-        public void MovePiece( Board board, Position newPosition )
+        public void MovePiece( Game game, Position newPosition )
         {
 
-            int numberOfTurns = board.Turns.Count;
+            int numberOfTurns = game.Turns.Count;
             int nextTurn = numberOfTurns + 1;
 
-            if(this.PieceIsAPawnMovingEnPassant( board, newPosition ))
+            if(this.PieceIsAPawnMovingEnPassant( game.Board, newPosition ))
             {
                 Position enPassantCapturePosition = FindEnPassantCapturePosition( newPosition );
-                Piece capturedPiece = board.WhatPieceIsHere( enPassantCapturePosition );
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
-                board.Capture( enPassantCapturePosition );
+                Piece capturedPiece = game.Board.WhatPieceIsHere( enPassantCapturePosition );
+                game.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                game.Capture( enPassantCapturePosition );
             }
 
-            else if(this.PieceIsCapturingNormally( board, newPosition ))
+            else if(this.PieceIsCapturingNormally( game.Board, newPosition ))
             {
-                Piece capturedPiece = board.WhatPieceIsHere( newPosition );
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
-                board.Capture( newPosition );
+                Piece capturedPiece = game.Board.WhatPieceIsHere( newPosition );
+                game.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                game.Capture( newPosition );
             }
 
             else if(this.PieceIsKingTryingToCastle( newPosition ))
             {
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true ) );
-                this.CastleRookMove( board, newPosition );
+                game.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true ) );
+                this.CastleRookMove( game.Board, newPosition );
             }
 
             else //Piece Is Moving Normally Without Capturing
             {
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                game.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
             }
 
-            this.MoveSquare( board, newPosition );
+            this.MoveSquare( game.Board, newPosition );
             Position = newPosition;
             HasMoved = true;
 
-            board.CheckForPawnToPromote();
-        }
-
-        private void MoveSquare( Board board, Position newPosition, Piece piece )
-        {
-            Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( piece.Position ) );
-            oldSquare.Piece = null;
-
-            Square? newSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( newPosition ) );
-            newSquare.Piece = this;
+            game.Board.CheckForPawnToPromote();
         }
 
         public virtual bool NeedToPromote()
         {
-            return false; 
+            return false;
         }
+
         public bool PositionsAreEqual( Piece otherPiece )
         {
             if(this.Position.IsEqual( otherPiece.Position ))
@@ -197,7 +187,8 @@ namespace ChessClassLibrary
 
         protected bool ColorOfPieceAtNewPositionIsMyColor( Board board, Position newPosition )
         {
-            if(this.Color == board.CheckForPiece( newPosition )) return true;
+            if(this.Color == board.CheckForPiece( newPosition ))
+                return true;
 
             return false;
         }
@@ -220,11 +211,14 @@ namespace ChessClassLibrary
             Position targetRookPosition = new Position( this.Position.Row, targetRookColumn );
             Position finalRookPosition = new Position( this.Position.Row, finalRookColumn );
 
-            Piece? rook = board.Pieces.FirstOrDefault( p => p.IsARookThatCanCastle( targetRookPosition ) );
+            Square? square = board.Squares.FirstOrDefault( s => s.Position.IsEqual( targetRookPosition ) );
+            if(square.Piece.IsARookThatCanCastle() == false)
+            {
+                return;
+            }
 
-            this.MoveSquare( board, finalRookPosition, rook );
-            rook.Position.Column = finalRookColumn;
-            rook.HasMoved = true;
+            square.Piece.HasMoved = true;
+            this.MoveSquare( board, finalRookPosition, square.Piece );
 
         }
 
@@ -244,6 +238,16 @@ namespace ChessClassLibrary
             return capturePosition;
         }
 
+        private void MoveSquare( Board board, Position newPosition, Piece piece )
+        {
+            Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( piece.Position ) );
+            oldSquare.Piece = null;
+
+            Square? newSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( newPosition ) );
+            newSquare.Piece = this;
+
+            newSquare.Piece.Position = newPosition;
+        }
         private void MoveSquare( Board board, Position newPosition )
         {
             Square? oldSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( this.Position ) );
@@ -251,6 +255,8 @@ namespace ChessClassLibrary
 
             Square? newSquare = board.Squares.FirstOrDefault( s => s.Position.IsEqual( newPosition ) );
             newSquare.Piece = this;
+
+            newSquare.Piece.Position = newPosition;
         }
 
         private bool PieceIsAPawnMovingEnPassant( Board board, Position newPosition )
@@ -288,9 +294,13 @@ namespace ChessClassLibrary
         }
         private void ResetPiecePosition( Board board, Position oldPosition )
         {
-            Position.Row = oldPosition.Row;
-            Position.Column = oldPosition.Column;
-            board.UncoverPieces();
+            this.MoveSquare( board, oldPosition );
+        }
+
+        private void ResetPiecePosition( Board board, Position oldPosition, Piece tempCapturedPiece )
+        {
+            this.MoveSquare( board, oldPosition );
+            board.ReplaceTemporarilyRemovedToBeCapturedPiece( this.Position, tempCapturedPiece );
         }
 
         public string Color { get; protected set; }

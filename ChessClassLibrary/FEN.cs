@@ -1,6 +1,7 @@
 ﻿using ChessClassLibrary;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Text;
 
 namespace ChessClassLibrary
@@ -12,109 +13,137 @@ namespace ChessClassLibrary
         string fen = "";
 
 
-        public FenNotation( Board board )
+        public FenNotation( Game game )
         {
-            GenerateFEN( board );
+            GenerateFEN( game );
         }
 
 
         //Methods
-        public void GenerateFEN( Board board )
+        /*
+        public List<Piece> ReadToListOfPieces()
         {
-            GeneratePieceStrings( board );
+
+        }
+        */
+
+        public void GenerateFEN( Game game)
+        {
+            GeneratePieceStrings( game );
             GenerateMainSequence();
-            AddCurrentTurnColor( board );
-            AddCastlingAvailability( board );
-            //AddEnPassantSquare(board);
+            AddCurrentTurnColor( game );
+            AddCastlingAvailability( game );
+            AddEnPassantSquare( game );
             //Half move clock
             //Full move number
         }
 
-
-        private void AddEnPassantSquare( Board board )
+        private string GetChessNotationColumnAsString( int columnPosition )
         {
-            Turn? lastTurn = board.Turns.FirstOrDefault( p =>
-                p.Number == board.Turns.Count &&
-                p.EndingPosition.Row != p.CapturedPiece.Position.Row &&
-                p.EndingPosition.Column != p.CapturedPiece.Position.Column &&
-                p.CapturedPiece != null
+
+            string chessNotationColumn = "";
+            switch(columnPosition)
+            {
+                case 0:
+                    chessNotationColumn = "a";
+                    break;
+
+                case 1:
+                    chessNotationColumn = "b";
+                    break;
+
+                case 2:
+                    chessNotationColumn = "c";
+                    break;
+
+                case 3:
+                    chessNotationColumn = "d";
+                    break;
+
+                case 4:
+                    chessNotationColumn = "e";
+                    break;
+
+                case 5:
+                    chessNotationColumn = "f";
+                    break;
+
+                case 6:
+                    chessNotationColumn = "g";
+                    break;
+
+                case 7:
+                    chessNotationColumn = "h";
+                    break;
+
+            }
+            return chessNotationColumn;
+        }
+
+        private int GetEnPassantTargetRowPosition( Turn lastTurn )
+        {
+            if(lastTurn.StartingPosition.Row == 1)
+                return 2;
+            else
+                return 6;
+        }
+
+        private string GetChessNotationRowAsString( int rowPosition )
+        {
+            int chessNotationRow = 8 - rowPosition;
+            return chessNotationRow.ToString();
+        }
+
+        private void AddEnPassantSquare( Game game )
+        {
+            Turn? lastTurn = game.Turns.FirstOrDefault( p =>
+                p.Number == game.Turns.Count &&
+                Math.Abs(p.EndingPosition.Row - p.StartingPosition.Row) == 2 &&
+                p.Piece.Name == "pawn"
             );
+
             if(lastTurn == null)
             {
                 fen = fen + " -";
+                return;
             }
-            else
-            {
-                int colPosition = lastTurn.EndingPosition.Column;
-                string colPositionString = "";
-                switch(colPosition)
-                {
-                    case 0:
-                        colPositionString = "a";
-                        break;
 
-                    case 1:
-                        colPositionString = "b";
-                        break;
+            int enPassantTargetRowPosition = GetEnPassantTargetRowPosition( lastTurn );
 
-                    case 2:
-                        colPositionString = "c";
-                        break;
+            int colPosition = lastTurn.EndingPosition.Column;
+            string chessNotationColumn = GetChessNotationColumnAsString( colPosition );
+            string chessNotationRow = GetChessNotationRowAsString( enPassantTargetRowPosition );
 
-                    case 3:
-                        colPositionString = "d";
-                        break;
+            string enPassantPositonString = chessNotationColumn + chessNotationRow;
 
-                    case 4:
-                        colPositionString = "e";
-                        break;
+            fen = fen + " " + enPassantPositonString;
 
-                    case 5:
-                        colPositionString = "f";
-                        break;
-
-                    case 6:
-                        colPositionString = "g";
-                        break;
-
-                    case 7:
-                        colPositionString = "h";
-                        break;
-
-                }
-
-                int rowPosition = Math.Abs( lastTurn.EndingPosition.Row - lastTurn.StartingPosition.Row );
-                string rowPositionString = rowPosition.ToString();
-                string enPassantPositonString = colPositionString + rowPositionString;
-
-                fen = fen + " " + enPassantPositonString;
-            }
         }
 
 
 
-        private void AddCastlingAvailability( Board board )
+        private void AddCastlingAvailability( Game game )
         {
             string castlingRights = "";
-            if(WhiteKingCanCastle( board ) == true)
+            if(WhiteKingCanCastle( game ) == true)
             {
-                if(WhiteKingRookCanCastle( board ) == true)
+                if(WhiteKingRookCanCastle( game ) == true)
                 {
                     castlingRights += "K";
                 }
-                if(WhiteQueenRookCanCastle( board ) == true)
+                if(WhiteQueenRookCanCastle( game ) == true)
                 {
                     castlingRights += "Q";
                 }
             }
 
-            if(BlackKingCanCastle( board ) == true)
+            if(BlackKingCanCastle( game ) == true)
             {
-                if(BlackKingRookCanCastle( board ) == true)
+                if(BlackKingRookCanCastle( game ) == true)
                 {
                     castlingRights += "k";
                 }
-                if(BlackQueenRookCanCastle( board ) == true)
+                if(BlackQueenRookCanCastle( game ) == true)
                 {
                     castlingRights += "q";
                 }
@@ -127,10 +156,9 @@ namespace ChessClassLibrary
 
         }
 
-        private bool WhiteKingCanCastle( Board board )
+        private bool WhiteKingCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "white" &&
+            Piece? whiteKingRook = game.WhitePlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "king" &&
                 p.HasMoved == false &&
                 p.Position.Row == 7 &&
@@ -140,10 +168,9 @@ namespace ChessClassLibrary
             else return false;
         }
 
-        private bool BlackKingCanCastle( Board board )
+        private bool BlackKingCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "black" &&
+            Piece? whiteKingRook = game.BlackPlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "king" &&
                 p.HasMoved == false &&
                 p.Position.Row == 0 &&
@@ -153,10 +180,9 @@ namespace ChessClassLibrary
             else return false;
         }
 
-        private bool WhiteKingRookCanCastle( Board board )
+        private bool WhiteKingRookCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "white" &&
+            Piece? whiteKingRook = game.WhitePlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "rook" &&
                 p.HasMoved == false &&
                 p.Position.Row == 7 &&
@@ -166,10 +192,9 @@ namespace ChessClassLibrary
             else return false;
         }
 
-        private bool WhiteQueenRookCanCastle( Board board )
+        private bool WhiteQueenRookCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "white" &&
+            Piece? whiteKingRook = game.WhitePlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "rook" &&
                 p.HasMoved == false &&
                 p.Position.Row == 7 &&
@@ -179,10 +204,9 @@ namespace ChessClassLibrary
             else return false;
         }
 
-        private bool BlackKingRookCanCastle( Board board )
+        private bool BlackKingRookCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "black" &&
+            Piece? whiteKingRook = game.BlackPlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "rook" &&
                 p.HasMoved == false &&
                 p.Position.Row == 0 &&
@@ -192,10 +216,9 @@ namespace ChessClassLibrary
             else return false;
         }
 
-        private bool BlackQueenRookCanCastle( Board board )
+        private bool BlackQueenRookCanCastle( Game game )
         {
-            Piece? whiteKingRook = board.Pieces.FirstOrDefault( p =>
-                p.Color == "black" &&
+            Piece? whiteKingRook = game.BlackPlayer.Pieces.FirstOrDefault( p =>
                 p.Name == "rook" &&
                 p.HasMoved == false &&
                 p.Position.Row == 0 &&
@@ -206,9 +229,9 @@ namespace ChessClassLibrary
         }
 
 
-        private void AddCurrentTurnColor( Board board )
+        private void AddCurrentTurnColor( Game game )
         {
-            string turn = board.CurrentTurnColor;
+            string turn = game.CurrentTurnColor;
             string turnLetter = "";
             if(turn == "white")
                 turnLetter = "w";
@@ -257,45 +280,44 @@ namespace ChessClassLibrary
             fen += spacesString;
         }
 
-        public void GeneratePieceStrings( Board board )
+        public void GeneratePieceStrings( Game game )
         {
-            foreach(Piece piece in board.Pieces)
+            GenerateWhitePieceStrings( game );
+            GenerateBlackPieceStrings( game );
+        }
+
+        private void GenerateWhitePieceStrings( Game game )
+        {
+            foreach(Piece piece in game.WhitePlayer.Pieces)
             {
                 string pieceChar = "";
                 string pieceName = piece.Name;
-                string pieceColor = piece.Color;
                 int row = piece.Position.Row;
                 int col = piece.Position.Column;
                 switch(pieceName)
                 {
                     case "king":
-                        if(piece.Color == "white") pieceChar = "K";
-                        else pieceChar = "k";
+                        pieceChar = "K";
                         break;
 
                     case "queen":
-                        if(piece.Color == "white") pieceChar = "Q";
-                        else pieceChar = "q";
+                        pieceChar = "Q";
                         break;
 
                     case "rook":
-                        if(piece.Color == "white") pieceChar = "R";
-                        else pieceChar = "r";
+                        pieceChar = "R";
                         break;
 
                     case "bishop":
-                        if(piece.Color == "white") pieceChar = "B";
-                        else pieceChar = "b";
+                        pieceChar = "B";
                         break;
 
                     case "knight":
-                        if(piece.Color == "white") pieceChar = "N";
-                        else pieceChar = "n";
+                        pieceChar = "N";
                         break;
 
                     case "pawn":
-                        if(piece.Color == "white") pieceChar = "P";
-                        else pieceChar = "p";
+                        pieceChar = "P";
                         break;
                 }
 
@@ -303,6 +325,47 @@ namespace ChessClassLibrary
 
             }
         }
+
+        private void GenerateBlackPieceStrings( Game game )
+        {
+            foreach(Piece piece in game.WhitePlayer.Pieces)
+            {
+                string pieceChar = "";
+                string pieceName = piece.Name;
+                int row = piece.Position.Row;
+                int col = piece.Position.Column;
+                switch(pieceName)
+                {
+                    case "king":
+                        pieceChar = "k";
+                        break;
+
+                    case "queen":
+                        pieceChar = "q";
+                        break;
+
+                    case "rook":
+                        pieceChar = "r";
+                        break;
+
+                    case "bishop":
+                        pieceChar = "b";
+                        break;
+
+                    case "knight":
+                        pieceChar = "n";
+                        break;
+
+                    case "pawn":
+                        pieceChar = "p";
+                        break;
+                }
+
+                pieceStrings[row, col] = pieceChar;
+
+            }
+        }
+
     }
 }
 

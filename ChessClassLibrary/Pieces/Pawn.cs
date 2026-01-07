@@ -90,7 +90,7 @@ namespace ChessClassLibrary
             Position enPassantPieceToCaptureCurrentPosition = new Position( FindEnPassantCurrentRow( move ), move.EndingPosition.Column );
             Position enPassantPieceToCapturePriorPosition = new Position( FindEnPassantStartRow( enPassantPieceToCaptureCurrentPosition ), move.EndingPosition.Column );
 
-            Turn lastTurn = board.ReturnLastTurn( board );
+            Turn lastTurn = board._parentGame.ReturnLastTurn();
 
             if(lastTurn == null) return false;
 
@@ -167,14 +167,15 @@ namespace ChessClassLibrary
 
         public override bool CheckValidMove( Board board, Position newPosition )
         {
-            string stateOfNewPosition = board.CheckForPiece( newPosition ); //white,black,none
-
-            Move move = new Move( this.Position, newPosition );
 
             if(this.ColorOfPieceAtNewPositionIsMyColor( board, newPosition ))
             {
                 return false;
             }
+
+            string stateOfNewPosition = board.CheckForPiece( newPosition ); //white,black,none
+
+            Move move = new Move( this.Position, newPosition );
 
             if(CheckIfAnyPawnMoveTypeIsValid( move, stateOfNewPosition, board ))
             {

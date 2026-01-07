@@ -67,12 +67,18 @@ namespace ChessClassLibrary
 
             Position targetRookPosition = new Position( this.Position.Row, targetRookColumn );
 
-            Piece? rook = board.Pieces.FirstOrDefault( r => r.IsARookThatCanCastle( targetRookPosition ) );
+            Square? square = board.Squares.FirstOrDefault( s => s.Position.IsEqual( targetRookPosition ) );
+            if(square.Piece == null)
+            {
+                return false;
+            }
 
-            if(rook != null)
-                return true;
+            if(square.Piece.IsARookThatCanCastle() == false)
+            {
+                return false;
+            }
 
-            return false;
+            return true;
 
         }
 

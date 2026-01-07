@@ -57,7 +57,7 @@ namespace ChessUI
 
             this.InitializeBoardGraphics();
 
-            board.SetupGame();
+            game.SetupGame();
 
             this.DrawBoard();
 
@@ -65,7 +65,15 @@ namespace ChessUI
 
         private void AssignOccupiedSpacesToImages()
         {
-            foreach(var piece in board.Pieces)
+            foreach(var piece in game.WhitePlayer.Pieces)
+            {
+                int row = piece.Position.Row;
+                int column = piece.Position.Column;
+
+                pieceImages[row, column].Source = Images.GetImage( piece );
+            }
+
+            foreach(var piece in game.BlackPlayer.Pieces)
             {
                 int row = piece.Position.Row;
                 int column = piece.Position.Column;
@@ -76,9 +84,9 @@ namespace ChessUI
 
         private void AssignHighlights()
         {
-            foreach(var square in board.Squares)
+            foreach(var square in game.Board.Squares)
             {
-                if(selectedPiece.AllowedToMove( board, square.Position ))
+                if(selectedPiece.AllowedToMove( game.Board, square.Position ))
                 {
                     DetermineAndDisplayHighlight( square );
                 }
@@ -99,18 +107,19 @@ namespace ChessUI
 
         private void AttemptToMovePieceToNewPosition( Position newPosition )
         {
-            if(selectedPiece.AllowedToMove( board, newPosition ) == false)
+            if(selectedPiece.AllowedToMove( game.Board, newPosition ) == false)
             {
                 this.DeselectPiece();
                 this.ClearBoardHighlights();
+                return;
             }
 
-            selectedPiece.MovePiece( board, newPosition );
+            selectedPiece.MovePiece( game, newPosition );
             this.DrawBoard();
 
-            if(board.APawnNeedsToPromote == true)
+            if(game.Board.APawnNeedsToPromote == true)
             {
-                this.DrawPromotionChoices( board );
+                this.DrawPromotionChoices();
                 return;
             }
 
@@ -123,7 +132,7 @@ namespace ChessUI
             System.Windows.Point clickedPoint = e.GetPosition( BoardGrid );
             Position clickedPosition = this.ToSquarePosition( clickedPoint );
 
-            if(board.APawnNeedsToPromote)
+            if(game.Board.APawnNeedsToPromote)
             {
                 this.Promotion( clickedPosition );
             }
@@ -142,7 +151,7 @@ namespace ChessUI
         private void CheckForEndOfGame()
         {
             string endOfGame = "";
-            endOfGame = board.CheckForMateOrDraw();
+            endOfGame = game.CheckForMateOrDraw();
 
             if(endOfGame == "checkmate")
             {
@@ -203,11 +212,11 @@ namespace ChessUI
             this.AssignOccupiedSpacesToImages();
         }
 
-        private void DrawPromotionChoices( Board board )
+        private void DrawPromotionChoices()
         {
-            foreach(var piece in board.PromotionList)
+            foreach(var piece in game.PromotionList)
             {
-                if(piece.Color == board.CurrentTurnColor)
+                if(piece.Color == game.CurrentTurnColor)
                 {
                     int row = piece.Position.Row;
                     int column = piece.Position.Column;
@@ -220,11 +229,11 @@ namespace ChessUI
         private void EndTurn()
         {
             this.DrawBoard();
-            board.NextTurn();
+            game.NextTurn();
 
             this.CheckForEndOfGame();
 
-            board.AddFEN( board );
+            game.AddFEN();
             this.DeselectPiece();
         }
 
@@ -242,14 +251,14 @@ namespace ChessUI
 
         private void Promotion( Position clickedPosition )
         {
-            Piece? promotablePiece = board.CheckForPromotablePiece();
-            Piece? promoteToPiece = board.CheckForPieceToPromoteTo( clickedPosition );
+            Piece? promotablePawn = game.CurrentPlayer.ReturnPromotablePawn();
+            Piece? promoteToPiece = game.CheckForPieceToPromoteTo( clickedPosition );
 
-            if(promotablePiece != null && promoteToPiece != null)
+            if(promotablePawn != null && promoteToPiece != null)
             {
 
-                board.PromotePiece( promotablePiece, promoteToPiece );
-                board.APawnNeedsToPromote = false;
+                game.PromotePiece( promotablePawn, promoteToPiece );
+                game.Board.APawnNeedsToPromote = false;
                 this.EndTurn();
 
             }
@@ -257,9 +266,13 @@ namespace ChessUI
 
         private void SetPositionAndPieceIfCorrectTurn( Piece piece, Position clickedPosition )
         {
+            if(piece == null)
+            {
+                return;
+            }
             selectedPiece = piece;
 
-            if(selectedPiece.Color != board.CurrentTurnColor)
+            if(selectedPiece.Color != game.CurrentTurnColor)
             {
                 this.DeselectPiece();
                 return;
@@ -269,11 +282,11 @@ namespace ChessUI
 
         private void SetSelectedPositionAndPiece( Position clickedPosition )
         {
-            foreach(var piece in board.Pieces)
+            foreach(var square in game.Board.Squares)
             {
-                if(piece.Position.IsEqual( clickedPosition ))
+                if(square.Position.IsEqual( clickedPosition ))
                 {
-                    this.SetPositionAndPieceIfCorrectTurn( piece, clickedPosition );
+                    this.SetPositionAndPieceIfCorrectTurn( square.Piece, clickedPosition );
                 }
             }
         }
@@ -291,7 +304,7 @@ namespace ChessUI
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
 
 
-        Board board = new Board();
+        Game game = new Game();
         private Piece selectedPiece = null;
     }
 }
