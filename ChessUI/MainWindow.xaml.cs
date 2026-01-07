@@ -53,15 +53,22 @@ namespace ChessUI
 
         public MainWindow()
         {
+
             InitializeComponent();
+
+        }
+
+        private void Button_Click( object sender, RoutedEventArgs e )
+        {
+            StartGame.Visibility = Visibility.Collapsed;
 
             this.InitializeBoardGraphics();
 
             board.SetupGame();
 
             this.DrawBoard();
-
         }
+
 
         private void AssignOccupiedSpacesToImages()
         {
@@ -103,6 +110,7 @@ namespace ChessUI
             {
                 this.DeselectPiece();
                 this.ClearBoardHighlights();
+                return;
             }
 
             selectedPiece.MovePiece( board, newPosition );
@@ -274,6 +282,7 @@ namespace ChessUI
                 if(piece.Position.IsEqual( clickedPosition ))
                 {
                     this.SetPositionAndPieceIfCorrectTurn( piece, clickedPosition );
+                    return;
                 }
             }
         }

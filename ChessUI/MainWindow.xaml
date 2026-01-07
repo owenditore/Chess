@@ -10,13 +10,37 @@
         WindowStartupLocation="CenterScreen"
         Background="#101010">
     <Viewbox>
+        <!--<Grid x:Name="MainMenu">
+            <Button x:Name="StartGame"
+                    Height="75"
+                    Width="300"
+                    Click="OnClick1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                
+            </Button>
+        </Grid>-->
+              
         <Grid x:Name="BoardGrid"
               Width="600"
               Height="600"
-              MouseDown="BoardGrid_MouseDown">
+              MouseDown="BoardGrid_MouseDown"
+              Visibility="Visible">
+
             <Grid.Background>
                 <ImageBrush ImageSource="/Assets/Board.png"/>
             </Grid.Background>
+
+            <Button x:Name="StartGame"
+                    Height="75"
+                    Width="300"
+                    Click="Button_Click"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="Start Game"
+                    FontSize="30"
+                    Visibility="Visible">
+            </Button>
 
             <UniformGrid x:Name="HighlightGrid"
                          Rows="8"
@@ -27,11 +51,26 @@
                          Rows="8"
                          Columns="8">
 
+                <!--<UniformGrid.LayoutTransform>
+                    <RotateTransform Angle="180"/>
+                </UniformGrid.LayoutTransform>
+
+                <UniformGrid.Resources>
+                    --><!-- 2. Rotate children back 180 degrees so they stay upright --><!--
+                    <Style TargetType="FrameworkElement">
+                        <Setter Property="LayoutTransform">
+                            <Setter.Value>
+                                <RotateTransform Angle="180"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </UniformGrid.Resources>-->
+
             </UniformGrid>
 
-            <StackPanel Grid.Row="4" Grid.Column="4">
-                <TextBlock x:Name="Checkmate" Text="Checkmate!" Visibility="Hidden"/>
-                <TextBlock x:Name="Draw" Text="Draw" Visibility="Hidden"/>
+            <StackPanel Grid.Row="300" Grid.Column="300">
+                <TextBlock x:Name="Checkmate" Text="Checkmate!" FontSize="30" Visibility="Hidden"/>
+                <TextBlock x:Name="Draw" Text="Draw" FontSize="30" Visibility="Hidden"/>
             </StackPanel>
 
         </Grid>
