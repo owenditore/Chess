@@ -58,9 +58,9 @@ namespace ChessUI
 
         }
 
-        private void Button_Click( object sender, RoutedEventArgs e )
+        private void Local_Click( object sender, RoutedEventArgs e )
         {
-            StartGame.Visibility = Visibility.Collapsed;
+            HideLocalOnlineMenu();
 
             this.InitializeBoardGraphics();
 
@@ -69,6 +69,23 @@ namespace ChessUI
             this.DrawBoard();
         }
 
+        private void Online_Click( object sender, RoutedEventArgs e )
+        {
+            HideLocalOnlineMenu();
+            RevealUsernameEntryMenu();
+        }
+
+        private void RevealUsernameEntryMenu()
+        {
+
+        }
+
+        private void HideLocalOnlineMenu()
+        {
+            Local.Visibility = Visibility.Collapsed;
+            Online.Visibility = Visibility.Collapsed;
+            PlayLocalOrOnline.Visibility = Visibility.Collapsed;
+        }
 
         private void AssignOccupiedSpacesToImages()
         {

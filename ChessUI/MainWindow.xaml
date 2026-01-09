@@ -10,17 +10,7 @@
         WindowStartupLocation="CenterScreen"
         Background="#101010">
     <Viewbox>
-        <!--<Grid x:Name="MainMenu">
-            <Button x:Name="StartGame"
-                    Height="75"
-                    Width="300"
-                    Click="OnClick1"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                
-            </Button>
-        </Grid>-->
-              
+
         <Grid x:Name="BoardGrid"
               Width="600"
               Height="600"
@@ -31,15 +21,36 @@
                 <ImageBrush ImageSource="/Assets/Board.png"/>
             </Grid.Background>
 
-            <Button x:Name="StartGame"
+
+            <TextBlock x:Name="PlayLocalOrOnline"
+                       Width="400"
+                       FontSize="30"
+                       Text="How Do You Want To Play?"
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Visible"
+                       Margin="100,86,100,464"/>
+
+            <Button x:Name="Local"
                     Height="75"
                     Width="300"
-                    Click="Button_Click"
+                    Click="Local_Click"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Content="Start Game"
+                    Content="Local"
                     FontSize="30"
-                    Visibility="Visible">
+                    Visibility="Visible"
+                    Margin="0,188,0,337">
+            </Button>
+
+            <Button x:Name="Online"
+                    Height="75"
+                    Width="300"
+                    Click="Online_Click"
+                    HorizontalAlignment="Center"
+                    Content="Online"
+                    FontSize="30"
+                    Visibility="Visible"
+                    Margin="0,338,0,187">
             </Button>
 
             <UniformGrid x:Name="HighlightGrid"
@@ -51,31 +62,34 @@
                          Rows="8"
                          Columns="8">
 
-                <!--<UniformGrid.LayoutTransform>
-                    <RotateTransform Angle="180"/>
-                </UniformGrid.LayoutTransform>
-
-                <UniformGrid.Resources>
-                    --><!-- 2. Rotate children back 180 degrees so they stay upright --><!--
-                    <Style TargetType="FrameworkElement">
-                        <Setter Property="LayoutTransform">
-                            <Setter.Value>
-                                <RotateTransform Angle="180"/>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </UniformGrid.Resources>-->
-
             </UniformGrid>
 
-            <StackPanel Grid.Row="300" Grid.Column="300">
-                <TextBlock x:Name="Checkmate" Text="Checkmate!" FontSize="30" Visibility="Hidden"/>
-                <TextBlock x:Name="Draw" Text="Draw" FontSize="30" Visibility="Hidden"/>
-            </StackPanel>
+
+
+            <TextBlock x:Name="Draw" 
+                        Text="Draw" 
+                        FontSize="30"
+                        Height="45"
+                        Width="200"
+                        Background="LightGray"
+                        TextAlignment="Center"
+                        Visibility="Hidden"
+                        Margin="200,278,200,278"/>
+            
+            <TextBlock x:Name="Checkmate" 
+                        Text="Checkmate!" 
+                        FontSize="30"
+                        Height="45"
+                        Width="200"
+                        Background="LightGray"
+                        TextAlignment="Center"
+                        Visibility="Hidden"
+                        Margin="200,278,200,278"/>
+
 
         </Grid>
 
     </Viewbox>
-    
+
 
 </Window>
