@@ -72,12 +72,15 @@ namespace ChessUI
         private void Online_Click( object sender, RoutedEventArgs e )
         {
             HideLocalOnlineMenu();
-            RevealUsernameEntryMenu();
+            RevealNewOrReturningUser();
+
         }
 
-        private void RevealUsernameEntryMenu()
+        private void RevealNewOrReturningUser()
         {
-
+            NewOrReturningUser.Visibility = Visibility.Visible;
+            ReturningUser.Visibility = Visibility.Visible;
+            NewUser.Visibility = Visibility.Visible;
         }
 
         private void HideLocalOnlineMenu()
@@ -316,8 +319,9 @@ namespace ChessUI
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
 
-
+        int userID = 0;
         Board board = new Board();
+        DatabaseConnection databaseConnection = new DatabaseConnection();
         private Piece selectedPiece = null;
     }
 }

@@ -31,6 +31,15 @@
                        Visibility="Visible"
                        Margin="100,86,100,464"/>
 
+            <TextBlock x:Name="NewOrReturningUser"
+                       Width="500"
+                       FontSize="30"
+                       Text="Are You A New Or Returning User?"
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,86,0,464"/>
+
             <Button x:Name="Local"
                     Height="75"
                     Width="300"
@@ -50,6 +59,28 @@
                     Content="Online"
                     FontSize="30"
                     Visibility="Visible"
+                    Margin="0,338,0,187">
+            </Button>
+
+            <Button x:Name="NewUser"
+                    Height="75"
+                    Width="300"
+                    Click="Local_Click"
+                    HorizontalAlignment="Center"
+                    Content="New"
+                    FontSize="30"
+                    Visibility="Collapsed"
+                    Margin="0,188,0,337">
+            </Button>
+
+            <Button x:Name="ReturningUser"
+                    Height="75"
+                    Width="300"
+                    Click="Online_Click"
+                    HorizontalAlignment="Center"
+                    Content="Returning"
+                    FontSize="30"
+                    Visibility="Collapsed"
                     Margin="0,338,0,187">
             </Button>
 
