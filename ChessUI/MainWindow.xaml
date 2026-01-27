@@ -40,6 +40,34 @@
                        Visibility="Collapsed"
                        Margin="0,86,0,464"/>
 
+            <TextBlock x:Name="NewUserEnterUsername"
+                       Width="500"
+                       FontSize="30"
+                       Text="Please Enter A New Username."
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,86,0,464"/>
+
+            <TextBlock x:Name="ReturningUserEnterUsername"
+                       Width="500"
+                       FontSize="30"
+                       Text="Please Enter Your Username."
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,86,0,464"/>
+
+            <TextBox x:Name="UsernameEntryBox"
+                     Height="30"
+                       Width="300"
+                       FontSize="23"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,188,0,337"/>
+
             <Button x:Name="Local"
                     Height="75"
                     Width="300"
@@ -65,7 +93,7 @@
             <Button x:Name="NewUser"
                     Height="75"
                     Width="300"
-                    Click="Local_Click"
+                    Click="NewUser_Click"
                     HorizontalAlignment="Center"
                     Content="New"
                     FontSize="30"
@@ -76,7 +104,40 @@
             <Button x:Name="ReturningUser"
                     Height="75"
                     Width="300"
-                    Click="Online_Click"
+                    Click="Returning_Click"
+                    HorizontalAlignment="Center"
+                    Content="Returning"
+                    FontSize="30"
+                    Visibility="Collapsed"
+                    Margin="0,338,0,187">
+            </Button>
+
+            <Button x:Name="Enter"
+                    Height="75"
+                    Width="300"
+                    Click="Enter_Click"
+                    HorizontalAlignment="Center"
+                    Content="Enter"
+                    FontSize="30"
+                    Visibility="Collapsed"
+                    Margin="0,338,0,187">
+            </Button>
+
+            <Button x:Name="NewGame"
+                    Height="75"
+                    Width="300"
+                    Click="NewGame_Click"
+                    HorizontalAlignment="Center"
+                    Content="New"
+                    FontSize="30"
+                    Visibility="Collapsed"
+                    Margin="0,188,0,337">
+            </Button>
+
+            <Button x:Name="ResumeGame"
+                    Height="75"
+                    Width="300"
+                    Click="ResumeGame_Click"
                     HorizontalAlignment="Center"
                     Content="Returning"
                     FontSize="30"
@@ -106,7 +167,7 @@
                         TextAlignment="Center"
                         Visibility="Hidden"
                         Margin="200,278,200,278"/>
-            
+
             <TextBlock x:Name="Checkmate" 
                         Text="Checkmate!" 
                         FontSize="30"

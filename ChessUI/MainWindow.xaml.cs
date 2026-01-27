@@ -72,11 +72,77 @@ namespace ChessUI
         private void Online_Click( object sender, RoutedEventArgs e )
         {
             HideLocalOnlineMenu();
-            RevealNewOrReturningUser();
+            RevealNewOrReturningMenu();
+        }
+
+        private void NewUser_Click( object sender, RoutedEventArgs e )
+        {
+            HideNewOrReturningMenu();
+            RevealNewUserEnterInfo();
+            newUser = true;
+        }
+
+        private void Enter_Click( object sender, RoutedEventArgs e )
+        {
+            username = UsernameEntryBox.Text;
+            HideUserEnterInfo();
+            userID = databaseConnection.LoginUser( newUser, username );
+            RevealNewOrOngoingGame();
+        }
+
+        private void NewGame_Click( object sender, RoutedEventArgs e )
+        {
 
         }
 
-        private void RevealNewOrReturningUser()
+        private void ResumeGame_Click( object sender, RoutedEventArgs e )
+        {
+
+        }
+
+        private void RevealNewOrOngoingGame()
+        {
+            NewGame.Visibility = Visibility.Visible;
+            ResumeGame.Visibility = Visibility.Visible;
+        }
+
+        private void Returning_Click( object sender, RoutedEventArgs e )
+        {
+            HideNewOrReturningMenu();
+            RevealReturningUserEnterInfo();
+            newUser = false;
+        }
+
+        private void RevealReturningUserEnterInfo()
+        {
+            ReturningUserEnterUsername.Visibility = Visibility.Visible;
+            UsernameEntryBox.Visibility = Visibility.Visible;
+            Enter.Visibility = Visibility.Visible;
+        }
+
+        private void HideUserEnterInfo()
+        {
+            NewUserEnterUsername.Visibility = Visibility.Collapsed;
+            ReturningUserEnterUsername.Visibility = Visibility.Collapsed;
+            UsernameEntryBox.Visibility = Visibility.Collapsed;
+            Enter.Visibility = Visibility.Collapsed;
+        }
+
+        private void RevealNewUserEnterInfo()
+        {
+            NewUserEnterUsername.Visibility = Visibility.Visible;
+            UsernameEntryBox.Visibility = Visibility.Visible;
+            Enter.Visibility = Visibility.Visible;
+        }
+
+        private void HideNewOrReturningMenu()
+        {
+            NewOrReturningUser.Visibility = Visibility.Collapsed;
+            ReturningUser.Visibility = Visibility.Collapsed;
+            NewUser.Visibility = Visibility.Collapsed;
+        }
+
+        private void RevealNewOrReturningMenu()
         {
             NewOrReturningUser.Visibility = Visibility.Visible;
             ReturningUser.Visibility = Visibility.Visible;
@@ -319,6 +385,8 @@ namespace ChessUI
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
 
+        string username;
+        bool newUser;
         int userID = 0;
         Board board = new Board();
         DatabaseConnection databaseConnection = new DatabaseConnection();

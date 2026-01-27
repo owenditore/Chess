@@ -53,27 +53,33 @@ namespace ChessClassLibrary
             if(move.Vertical != 0)
                 return false;
 
+            if(board.CheckForPiece( move.EndingPosition ) != "none")
+                return false;
 
-            int targetRookColumn;
 
-            if(move.Horizontal > 0)
-            {
-                targetRookColumn = 7;
-            }
-            else
-            {
-                targetRookColumn = 0;
-            }
+            int targetRookColumn = FindTargetRookColumn( move );
 
             Position targetRookPosition = new Position( this.Position.Row, targetRookColumn );
 
             Piece? rook = board.Pieces.FirstOrDefault( r => r.IsARookThatCanCastle( targetRookPosition ) );
 
-            if(rook != null)
-                return true;
+            if(rook == null)
+                return false;
 
-            return false;
+            return true;
 
+        }
+
+        private int FindTargetRookColumn(Move move)
+        {
+            if(move.Horizontal > 0)
+            {
+                return 7;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public King( string name, string color, int row, int col ) : base( name, color, row, col )
