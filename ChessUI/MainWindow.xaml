@@ -21,6 +21,28 @@
                 <ImageBrush ImageSource="/Assets/Board.png"/>
             </Grid.Background>
 
+            <ListBox Name="ListOfUsers"
+                     SelectionChanged="ListOfUsers_SelectionChanged"
+                     Width="300"
+                     Height="300"
+                     Background="LightGray"
+                     Visibility="Collapsed"
+                     Margin="150,268,150,32">
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+
+                            <TextBlock Text="{Binding}">
+                                
+                            </TextBlock>
+                            
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                
+            </ListBox>
+
 
             <TextBlock x:Name="PlayLocalOrOnline"
                        Width="400"
@@ -30,15 +52,6 @@
                        Background="LightGray"
                        Visibility="Visible"
                        Margin="100,86,100,464"/>
-
-            <TextBlock x:Name="NewOrReturningUser"
-                       Width="500"
-                       FontSize="30"
-                       Text="Are You A New Or Returning User?"
-                       TextAlignment="Center"
-                       Background="LightGray"
-                       Visibility="Collapsed"
-                       Margin="0,86,0,464"/>
 
             <TextBlock x:Name="NewUserEnterUsername"
                        Width="500"
@@ -57,6 +70,24 @@
                        Background="LightGray"
                        Visibility="Collapsed"
                        Margin="0,86,0,464"/>
+
+            <TextBlock x:Name="SelecteWhoYouWantToPlay"
+                       Width="500"
+                       FontSize="30"
+                       Text="Select Who You Want To Play."
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,86,0,464"/>
+
+
+            <TextBlock x:Name="InvalidUsername"
+                       FontSize="30"
+                       Text="Invalid Username"
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="150,450,150,100"/>
 
             <TextBox x:Name="UsernameEntryBox"
                      Height="30"
@@ -95,7 +126,7 @@
                     Width="300"
                     Click="NewUser_Click"
                     HorizontalAlignment="Center"
-                    Content="New"
+                    Content="Create Account"
                     FontSize="30"
                     Visibility="Collapsed"
                     Margin="0,188,0,337">
@@ -106,7 +137,7 @@
                     Width="300"
                     Click="Returning_Click"
                     HorizontalAlignment="Center"
-                    Content="Returning"
+                    Content="Login"
                     FontSize="30"
                     Visibility="Collapsed"
                     Margin="0,338,0,187">
@@ -128,7 +159,7 @@
                     Width="300"
                     Click="NewGame_Click"
                     HorizontalAlignment="Center"
-                    Content="New"
+                    Content="New Game"
                     FontSize="30"
                     Visibility="Collapsed"
                     Margin="0,188,0,337">
@@ -139,7 +170,7 @@
                     Width="300"
                     Click="ResumeGame_Click"
                     HorizontalAlignment="Center"
-                    Content="Returning"
+                    Content="Join Game"
                     FontSize="30"
                     Visibility="Collapsed"
                     Margin="0,338,0,187">

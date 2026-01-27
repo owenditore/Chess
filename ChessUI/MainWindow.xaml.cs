@@ -85,22 +85,75 @@ namespace ChessUI
         private void Enter_Click( object sender, RoutedEventArgs e )
         {
             username = UsernameEntryBox.Text;
-            HideUserEnterInfo();
             userID = databaseConnection.LoginUser( newUser, username );
-            RevealNewOrOngoingGame();
+
+            if(userID == 0)
+            {
+                InvalidUsername.Visibility = Visibility.Visible;
+                return;
+            }
+
+            HideUserEnterInfo();
+            RevealNewOrResumeGame();
         }
 
         private void NewGame_Click( object sender, RoutedEventArgs e )
         {
-
+            HideNewOrResumeGame();
+            users = databaseConnection.GetDictionaryOfUsers();
+            DisplayUserList();
         }
 
         private void ResumeGame_Click( object sender, RoutedEventArgs e )
         {
+            HideNewOrResumeGame();
+        }
+
+        private void ListOfUsers_SelectionChanged( object sender, SelectionChangedEventArgs e )
+        {
+            if(ListOfUsers.SelectedItem == null)
+            {
+                return;
+            }
+            string selectedUser = ListOfUsers.SelectedItem.ToString();
+            opponentUserID = users[selectedUser];
+
+            HideUserList();
+
+            gameID = databaseConnection.CreateNewGame( userID, opponentUserID );
+
+            playerColor = "white";
+
+            this.InitializeBoardGraphics();
+
+            board.SetupGame();
+
+            this.DrawBoard();
 
         }
 
-        private void RevealNewOrOngoingGame()
+        private void HideUserList()
+        {
+            ListOfUsers.Visibility = Visibility.Collapsed;
+            SelecteWhoYouWantToPlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void DisplayUserList()
+        {
+            List<string> usernames = users.Keys.ToList();
+            usernames.Remove( username );
+            ListOfUsers.ItemsSource = usernames;
+            ListOfUsers.Visibility = Visibility.Visible;
+            SelecteWhoYouWantToPlay.Visibility = Visibility.Visible;
+        }
+
+        private void HideNewOrResumeGame()
+        {
+            NewGame.Visibility = Visibility.Collapsed;
+            ResumeGame.Visibility = Visibility.Collapsed;
+        }
+
+        private void RevealNewOrResumeGame()
         {
             NewGame.Visibility = Visibility.Visible;
             ResumeGame.Visibility = Visibility.Visible;
@@ -126,6 +179,7 @@ namespace ChessUI
             ReturningUserEnterUsername.Visibility = Visibility.Collapsed;
             UsernameEntryBox.Visibility = Visibility.Collapsed;
             Enter.Visibility = Visibility.Collapsed;
+            InvalidUsername.Visibility = Visibility.Collapsed;
         }
 
         private void RevealNewUserEnterInfo()
@@ -137,14 +191,12 @@ namespace ChessUI
 
         private void HideNewOrReturningMenu()
         {
-            NewOrReturningUser.Visibility = Visibility.Collapsed;
             ReturningUser.Visibility = Visibility.Collapsed;
             NewUser.Visibility = Visibility.Collapsed;
         }
 
         private void RevealNewOrReturningMenu()
         {
-            NewOrReturningUser.Visibility = Visibility.Visible;
             ReturningUser.Visibility = Visibility.Visible;
             NewUser.Visibility = Visibility.Visible;
         }
@@ -233,7 +285,7 @@ namespace ChessUI
             }
         }
 
-        private void CheckForEndOfGame()
+        private string CheckForEndOfGame()
         {
             string endOfGame = "";
             endOfGame = board.CheckForMateOrDraw();
@@ -247,6 +299,7 @@ namespace ChessUI
             {
                 Draw.Visibility = Visibility.Visible;
             }
+            return endOfGame;
         }
 
         private void ClearBoardHighlights()
@@ -316,10 +369,22 @@ namespace ChessUI
             this.DrawBoard();
             board.NextTurn();
 
-            this.CheckForEndOfGame();
-
-            board.AddFEN( board );
+            string endOfGame = this.CheckForEndOfGame();
             this.DeselectPiece();
+
+            board.AddFEN();
+            fen = board.GetCurrentFEN();
+
+            string stateOfGame = "In Progress";
+            if(endOfGame != "")
+            {
+                stateOfGame = "Completed";
+            }
+
+            if(gameID != 0)
+            {
+                databaseConnection.EndTurnUpdateGame( gameID, fen, stateOfGame );
+            }
         }
 
         private void InitializeBoardGraphics()
@@ -358,6 +423,16 @@ namespace ChessUI
                 this.DeselectPiece();
                 return;
             }
+
+            if(gameID != 0)
+            {
+                if(selectedPiece.Color != playerColor)
+                {
+                    this.DeselectPiece();
+                    return;
+                }
+            }
+
             this.AssignHighlights();
         }
 
@@ -385,9 +460,14 @@ namespace ChessUI
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
 
+        string fen;
+        string playerColor;
+        Dictionary<string, int> users;
+        int gameID = 0;
         string username;
         bool newUser;
         int userID = 0;
+        int opponentUserID = 0;
         Board board = new Board();
         DatabaseConnection databaseConnection = new DatabaseConnection();
         private Piece selectedPiece = null;

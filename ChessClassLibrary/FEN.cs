@@ -9,7 +9,7 @@ namespace ChessClassLibrary
     {
         string[,] pieceStrings = new string[8, 8];
 
-        string fen = "";
+        public string fen { get; set; } = "";
 
 
         public FenNotation( Board board )
@@ -25,70 +25,98 @@ namespace ChessClassLibrary
             GenerateMainSequence();
             AddCurrentTurnColor( board );
             AddCastlingAvailability( board );
-            //AddEnPassantSquare(board);
-            //Half move clock
-            //Full move number
+            AddEnPassantSquare(board);
+            AddHalfMoveClock( board );
+            AddFullMoveNumber( board );
         }
 
+        private void AddFullMoveNumber( Board board )
+        {
+            string fullMoveNumber = board.FullMoveNumber.ToString();
+
+            fen = fen + " " + fullMoveNumber;
+        }
+
+        private void AddHalfMoveClock( Board board )
+        {
+            string halfMoveClock = board.HalfMoveClock.ToString();
+
+            fen = fen + " " + halfMoveClock;
+        }
 
         private void AddEnPassantSquare( Board board )
         {
             Turn? lastTurn = board.Turns.FirstOrDefault( p =>
                 p.Number == board.Turns.Count &&
-                p.EndingPosition.Row != p.CapturedPiece.Position.Row &&
-                p.EndingPosition.Column != p.CapturedPiece.Position.Column &&
-                p.CapturedPiece != null
+                p.Piece.Name == "pawn"
             );
+
             if(lastTurn == null)
             {
                 fen = fen + " -";
+                return;
+            }
+
+            if(Math.Abs(lastTurn.EndingPosition.Row - lastTurn.StartingPosition.Row) != 2)
+            {
+                fen = fen + " -";
+                return;
+            }
+
+            int colPosition = lastTurn.EndingPosition.Column;
+            string colPositionString = "";
+            switch(colPosition)
+            {
+                case 0:
+                    colPositionString = "a";
+                    break;
+
+                case 1:
+                    colPositionString = "b";
+                    break;
+
+                case 2:
+                    colPositionString = "c";
+                    break;
+
+                case 3:
+                    colPositionString = "d";
+                    break;
+
+                case 4:
+                    colPositionString = "e";
+                    break;
+
+                case 5:
+                    colPositionString = "f";
+                    break;
+
+                case 6:
+                    colPositionString = "g";
+                    break;
+
+                case 7:
+                    colPositionString = "h";
+                    break;
+
+            }
+
+            int rowPosition = 0;
+
+            if(lastTurn.Piece.Color == "white")
+            {
+                rowPosition = 8 - ( lastTurn.EndingPosition.Row + 1 );
             }
             else
             {
-                int colPosition = lastTurn.EndingPosition.Column;
-                string colPositionString = "";
-                switch(colPosition)
-                {
-                    case 0:
-                        colPositionString = "a";
-                        break;
-
-                    case 1:
-                        colPositionString = "b";
-                        break;
-
-                    case 2:
-                        colPositionString = "c";
-                        break;
-
-                    case 3:
-                        colPositionString = "d";
-                        break;
-
-                    case 4:
-                        colPositionString = "e";
-                        break;
-
-                    case 5:
-                        colPositionString = "f";
-                        break;
-
-                    case 6:
-                        colPositionString = "g";
-                        break;
-
-                    case 7:
-                        colPositionString = "h";
-                        break;
-
-                }
-
-                int rowPosition = Math.Abs( lastTurn.EndingPosition.Row - lastTurn.StartingPosition.Row );
-                string rowPositionString = rowPosition.ToString();
-                string enPassantPositonString = colPositionString + rowPositionString;
-
-                fen = fen + " " + enPassantPositonString;
+                rowPosition = 8 - ( lastTurn.EndingPosition.Row - 1 );
             }
+
+            string rowPositionString = rowPosition.ToString();
+            string enPassantPositonString = colPositionString + rowPositionString;
+
+            fen = fen + " " + enPassantPositonString;
+
         }
 
 

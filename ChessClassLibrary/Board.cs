@@ -23,9 +23,15 @@ namespace ChessClassLibrary
             }
         }
 
-        public void AddFEN( Board board )
+        public void AddFEN()
         {
-            FENs.Add( new FenNotation( board ) );
+            FENs.Add( new FenNotation( this ) );
+        }
+
+        public string GetCurrentFEN()
+        {
+            FenNotation currentFEN = FENs.Last();
+            return currentFEN.fen;
         }
 
         public bool AnyPieceAllowedToMove()
@@ -279,7 +285,31 @@ namespace ChessClassLibrary
             if(CurrentTurnColor == "white")
                 CurrentTurnColor = "black";
             else
+            {
                 CurrentTurnColor = "white";
+                FullMoveNumber++;
+            }
+
+            IncrementHalfMoveClock();
+        }
+
+        private void IncrementHalfMoveClock()
+        {
+            Turn? lastTurn = this.Turns.Last();
+
+            if( lastTurn.Piece.Name == "pawn")
+            {
+                HalfMoveClock = 0;
+                return;
+            }
+
+            if(lastTurn.CapturedPiece != null)
+            {
+                HalfMoveClock = 0;
+                return;
+            }
+
+            HalfMoveClock++;
         }
 
         public void PromotePiece( Piece promotablePiece, Piece promoteToPiece )
@@ -495,6 +525,10 @@ namespace ChessClassLibrary
         public List<Square> Squares { get; set; } = new List<Square>();
 
         public List<Turn> Turns { get; set; } = new List<Turn>();
+
+        public int HalfMoveClock { get; set; } = 0;
+
+        public int FullMoveNumber { get; set; } = 1;
 
         public Board()
         {
