@@ -31,7 +31,7 @@ namespace ChessClassLibrary
         public string GetCurrentFEN()
         {
             FenNotation currentFEN = FENs.Last();
-            return currentFEN.fen;
+            return currentFEN.Fen;
         }
 
         public bool AnyPieceAllowedToMove()
@@ -295,15 +295,13 @@ namespace ChessClassLibrary
 
         private void IncrementHalfMoveClock()
         {
-            Turn? lastTurn = this.Turns.Last();
-
-            if( lastTurn.Piece.Name == "pawn")
+            if( this.LastTurn.Piece.Name == "pawn")
             {
                 HalfMoveClock = 0;
                 return;
             }
 
-            if(lastTurn.CapturedPiece != null)
+            if(this.LastTurn.CapturedPiece != null)
             {
                 HalfMoveClock = 0;
                 return;
@@ -333,14 +331,6 @@ namespace ChessClassLibrary
             }
 
             this.Capture( promotablePiece );
-        }
-
-        public Turn ReturnLastTurn( Board board )
-        {
-            int numberOfTurns = board.Turns.Count();
-
-            return board.Turns.FirstOrDefault(t => t.Number == numberOfTurns );
-
         }
 
         public void SetupGame()
@@ -512,6 +502,43 @@ namespace ChessClassLibrary
             return true;
         }
 
+        private void CreateBoardSquares()
+        {
+            for(int row = 0; row < 8; row++)
+            {
+                for(int column = 0; column < 8; column++)
+                {
+                    this.Squares.Add( new Square( row, column ) );
+                }
+            }
+        }
+
+        private void ClearBoardState()
+        {
+            Pieces.Clear();
+            Squares.Clear();
+            CreateBoardSquares();
+        }
+
+        public void UpdateGameFromFEN( string fen )
+        {
+            ClearBoardState();
+
+            FenNotation fenFromDB = new FenNotation( fen );
+            FENs.Add( fenFromDB );
+            List<Piece> piecesFromFEN = fenFromDB.GetListOfPieces();
+
+            foreach(Piece piece in piecesFromFEN )
+            {
+                AddAPiece(piece);
+            }
+
+            LastTurn = fenFromDB.GetLastTurnForEnPassant();
+            CurrentTurnColor = fenFromDB.GetCurrentTurnColor();
+            HalfMoveClock = fenFromDB.GetHalfMoveClock();
+            FullMoveNumber = fenFromDB.GetFullMoveNumber();
+        }
+
         public bool APawnNeedsToPromote { get; set; } = false;
 
         public string CurrentTurnColor { get; set; } = "white";
@@ -524,7 +551,7 @@ namespace ChessClassLibrary
 
         public List<Square> Squares { get; set; } = new List<Square>();
 
-        public List<Turn> Turns { get; set; } = new List<Turn>();
+        public Turn LastTurn { get; set; }
 
         public int HalfMoveClock { get; set; } = 0;
 
@@ -532,13 +559,7 @@ namespace ChessClassLibrary
 
         public Board()
         {
-            for(int row = 0; row < 8; row++)
-            {
-                for(int column = 0; column < 8; column++)
-                {
-                    this.Squares.Add( new Square( row, column ) );
-                }
-            }
+            CreateBoardSquares();
         }
     }
 }

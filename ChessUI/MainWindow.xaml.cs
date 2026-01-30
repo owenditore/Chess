@@ -3,6 +3,7 @@ using System.Buffers.Text;
 using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -64,7 +65,11 @@ namespace ChessUI
 
             this.InitializeBoardGraphics();
 
-            board.SetupGame();
+            //board.SetupGame();
+
+            string fen = "q3k1nr/1pp1n1pp/3p4/1P2p3/4P3/B1PP1b2/B5PP/5K2 b k - 0 17";
+
+            board.UpdateGameFromFEN(fen);
 
             this.DrawBoard();
         }
@@ -107,6 +112,7 @@ namespace ChessUI
         private void ResumeGame_Click( object sender, RoutedEventArgs e )
         {
             HideNewOrResumeGame();
+            DisplayGamesList();
         }
 
         private void ListOfUsers_SelectionChanged( object sender, SelectionChangedEventArgs e )
@@ -132,6 +138,38 @@ namespace ChessUI
 
         }
 
+        private void ListOfJoinableGames_SelectionChanged( object sender, SelectionChangedEventArgs e )
+        {
+            if(ListOfJoinableGames.SelectedItem == null)
+            {
+                return;
+            }
+            GameLog selectedGameLog = (GameLog)ListOfJoinableGames.SelectedItem;
+            if(selectedGameLog.WhitePlayerID == userID)
+            {
+                playerColor = "white";
+            }
+            else
+            {
+                playerColor = "black";
+            }
+            gameID = selectedGameLog.GameID;
+
+            HideJoinGamesList();
+
+            this.InitializeBoardGraphics();
+
+            board.UpdateGameFromFEN( selectedGameLog.FEN );
+
+            this.DrawBoard();
+        }
+
+        private void HideJoinGamesList()
+        {
+            ListOfJoinableGames.Visibility = Visibility.Collapsed;
+            SelectGameToJoin.Visibility = Visibility.Collapsed;
+        }
+
         private void HideUserList()
         {
             ListOfUsers.Visibility = Visibility.Collapsed;
@@ -145,6 +183,17 @@ namespace ChessUI
             ListOfUsers.ItemsSource = usernames;
             ListOfUsers.Visibility = Visibility.Visible;
             SelecteWhoYouWantToPlay.Visibility = Visibility.Visible;
+        }
+
+        private void DisplayGamesList()
+        {
+
+            joinableGames = databaseConnection.GetListOfJoinableGames( userID );
+            
+            ListOfJoinableGames.ItemsSource = joinableGames;
+            ListOfJoinableGames.Visibility = Visibility.Visible;
+            SelectGameToJoin.Visibility = Visibility.Visible;
+
         }
 
         private void HideNewOrResumeGame()
@@ -364,7 +413,7 @@ namespace ChessUI
             }
         }
 
-        private void EndTurn()
+        private async Task EndTurn()
         {
             this.DrawBoard();
             board.NextTurn();
@@ -384,6 +433,24 @@ namespace ChessUI
             if(gameID != 0)
             {
                 databaseConnection.EndTurnUpdateGame( gameID, fen, stateOfGame );
+                await CheckForNewOnlineMove();
+            }
+        }
+
+        private async Task CheckForNewOnlineMove()
+        {
+            CancellationToken cancelToken = cancelTokenSource.Token;
+            using var timer = new PeriodicTimer( TimeSpan.FromSeconds( 1 ) );
+
+            while(await timer.WaitForNextTickAsync(cancelToken))
+            {
+                string newFen = databaseConnection.GetNewFenIfDifferent( gameID, fen );
+                if(newFen != null)
+                {
+                    board.UpdateGameFromFEN( newFen );
+                    this.DrawBoard();
+                    cancelTokenSource.Cancel();
+                }
             }
         }
 
@@ -460,6 +527,9 @@ namespace ChessUI
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
 
+        static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
+        List<GameLog> joinableGames;
         string fen;
         string playerColor;
         Dictionary<string, int> users;

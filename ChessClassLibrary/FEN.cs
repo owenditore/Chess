@@ -1,5 +1,6 @@
 ﻿using ChessClassLibrary;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,12 +10,37 @@ namespace ChessClassLibrary
     {
         string[,] pieceStrings = new string[8, 8];
 
-        public string fen { get; set; } = "";
+        public string Fen { get; set; } = "";
+
+        private string MainSequence { get; set; }
+
+        private string CurrentTurnColor { get; set; }
+
+        private string CastlingAvailability { get; set; }
+
+        private string EnPassantSquare { get; set; }
+
+        private string HalfMoveClock { get; set; }
+
+        private string FullMoveNumber { get; set; }
+
 
 
         public FenNotation( Board board )
         {
             GenerateFEN( board );
+        }
+
+        public FenNotation( string fen )
+        {
+            this.Fen = fen;
+            string[] partsOfFen = fen.Split( ' ' );
+            this.MainSequence = partsOfFen[0];
+            this.CurrentTurnColor = partsOfFen[1];
+            this.CastlingAvailability = partsOfFen[2];
+            this.EnPassantSquare = partsOfFen[3];
+            this.HalfMoveClock = partsOfFen[4];
+            this.FullMoveNumber = partsOfFen[5];
         }
 
 
@@ -28,38 +54,44 @@ namespace ChessClassLibrary
             AddEnPassantSquare(board);
             AddHalfMoveClock( board );
             AddFullMoveNumber( board );
+            AssembleFen();
+        }
+
+        private void AssembleFen()
+        {
+            Fen = MainSequence + " " + CurrentTurnColor + " " + CastlingAvailability + " " + EnPassantSquare + " " + HalfMoveClock + " " + FullMoveNumber;
         }
 
         private void AddFullMoveNumber( Board board )
         {
-            string fullMoveNumber = board.FullMoveNumber.ToString();
-
-            fen = fen + " " + fullMoveNumber;
+            FullMoveNumber = board.FullMoveNumber.ToString();
         }
 
         private void AddHalfMoveClock( Board board )
         {
-            string halfMoveClock = board.HalfMoveClock.ToString();
-
-            fen = fen + " " + halfMoveClock;
+            HalfMoveClock = board.HalfMoveClock.ToString();
         }
 
         private void AddEnPassantSquare( Board board )
         {
-            Turn? lastTurn = board.Turns.FirstOrDefault( p =>
-                p.Number == board.Turns.Count &&
-                p.Piece.Name == "pawn"
-            );
+            Turn? lastTurn = board.LastTurn;
 
             if(lastTurn == null)
             {
-                fen = fen + " -";
+                EnPassantSquare = "-";
                 return;
             }
 
+            if(lastTurn.Piece.Name != "pawn")
+            {
+                EnPassantSquare = "-";
+                return;
+            }
+
+
             if(Math.Abs(lastTurn.EndingPosition.Row - lastTurn.StartingPosition.Row) != 2)
             {
-                fen = fen + " -";
+                EnPassantSquare = "-";
                 return;
             }
 
@@ -115,7 +147,7 @@ namespace ChessClassLibrary
             string rowPositionString = rowPosition.ToString();
             string enPassantPositonString = colPositionString + rowPositionString;
 
-            fen = fen + " " + enPassantPositonString;
+            EnPassantSquare = enPassantPositonString;
 
         }
 
@@ -151,7 +183,7 @@ namespace ChessClassLibrary
             if(castlingRights == "")
                 castlingRights = "-";
 
-            fen = fen + " " + castlingRights;
+            CastlingAvailability = castlingRights;
 
         }
 
@@ -243,7 +275,7 @@ namespace ChessClassLibrary
             else
                 turnLetter = "b";
 
-            fen = fen + " " + turnLetter;
+            CurrentTurnColor = turnLetter;
         }
 
         public void GenerateMainSequence()
@@ -262,7 +294,7 @@ namespace ChessClassLibrary
                     {
                         AddEmptySpaceNumber( thisRowEmptySpacesInARow );
                         thisRowEmptySpacesInARow = 0;
-                        fen += pieceStrings[i, j];
+                        MainSequence += pieceStrings[i, j];
                     }
 
                     if(j == 7)
@@ -270,7 +302,7 @@ namespace ChessClassLibrary
                         AddEmptySpaceNumber( thisRowEmptySpacesInARow );
                         thisRowEmptySpacesInARow = 0;
                         if(i != 7)
-                            fen += "/";
+                            MainSequence += "/";
                     }
 
                 }
@@ -282,7 +314,7 @@ namespace ChessClassLibrary
             if(spaces == 0)
                 return;
             string spacesString = spaces.ToString();
-            fen += spacesString;
+            MainSequence += spacesString;
         }
 
         public void GeneratePieceStrings( Board board )
@@ -331,6 +363,218 @@ namespace ChessClassLibrary
 
             }
         }
+
+        public List<Piece> GetListOfPieces()
+        {
+            int currentRow = 0;
+            int currentColumn = 0;
+            int currentInt;
+
+            List <Piece> pieces = new List<Piece>();
+
+            foreach (char character in MainSequence)
+            {
+                string current = character.ToString();
+
+                if (current == "/")
+                {
+                    currentRow++;
+                    currentColumn = 0;
+                    continue;
+                }
+
+                if(int.TryParse(current, out currentInt))
+                {
+                    currentColumn += currentInt;
+                    continue;
+                }
+
+                Piece currentPiece = GetPieceFromMainSequenceCharacter( current, currentRow, currentColumn);
+
+                pieces.Add( currentPiece );
+
+                currentColumn++;
+            }
+
+            return pieces;
+        }
+
+        private Piece GetPieceFromMainSequenceCharacter( string letter, int row, int column )
+        {
+            bool canCastle;
+
+            switch(letter)
+            {
+                case "P":
+
+                    if(row == 6)
+                        return new Pawn( "pawn", "white", row, column, false );
+
+                    else
+                        return new Pawn( "pawn", "white", row, column, true );
+
+                case "p":
+
+                    if(row == 1)
+                        return new Pawn( "pawn", "black", row, column, false );
+
+                    else
+                        return new Pawn( "pawn", "black", row, column, true );
+
+                case "N":
+                    return new Knight( "knight", "white", row, column );
+                case "n":
+                    return new Knight( "knight", "black", row, column );
+                case "B":
+                    return new Bishop( "bishop", "white", row, column );
+                case "b":
+                    return new Bishop( "bishop", "black", row, column );
+                case "R":
+                    canCastle = AssessRookCastlingRights( letter, row, column );
+                    return new Rook( "rook", "white", row, column, !canCastle );
+                case "r":
+                    canCastle = AssessRookCastlingRights( letter, row, column );
+                    return new Rook( "rook", "black", row, column, !canCastle );
+                case "Q":
+                    return new Queen( "queen", "white", row, column );
+                case "q":
+                    return new Queen( "queen", "black", row, column );
+                case "K":
+                    canCastle = AssessKingCastlingRights( letter, row, column );
+                    return new King( "king", "white", row, column, !canCastle );
+                case "k":
+                    canCastle = AssessKingCastlingRights( letter, row, column );
+                    return new King( "king", "black", row, column, !canCastle );
+            }
+            return null;
+        }
+
+        private bool AssessKingCastlingRights( string letter, int row, int column )
+        {
+            if(letter == "K")
+            {
+                if(CastlingAvailability.Contains( "K" ) || CastlingAvailability.Contains( "Q" ))
+                    return true;
+            }
+            if(letter == "k")
+            {
+                if(CastlingAvailability.Contains( "k" ) || CastlingAvailability.Contains( "q" ))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool AssessRookCastlingRights( string letter, int row, int column )
+        {
+            if(letter == "R")
+            {
+                if(column == 0)
+                {
+                    return CastlingAvailability.Contains( "Q" );
+                }
+                if(column == 7)
+                {
+                    return CastlingAvailability.Contains( "K" );
+                }
+            }
+
+            if(letter == "r")
+            {
+                if(column == 0)
+                {
+                    return CastlingAvailability.Contains( "q" );
+                }
+                if(column == 7)
+                {
+                    return CastlingAvailability.Contains( "k" );
+                }
+            }
+            return false;
+        }
+
+        public Turn GetLastTurnForEnPassant()
+        {
+            if(EnPassantSquare == "-")
+            {
+                return null;
+            }
+
+            string fenColumnLetter = EnPassantSquare[0].ToString();
+            string fenRowNumber = EnPassantSquare[1].ToString();
+
+            int EnPassantSquareColumn = ConvertFenColumnLetterToRegularColumnNumber( fenColumnLetter );
+            int EnPassantSquareRow = ConvertFenRowNumberToRegularRowNumber( fenRowNumber );
+
+            if (CurrentTurnColor == "w")
+            {
+                Position startingPosition = new Position( (EnPassantSquareRow - 1) , EnPassantSquareColumn );
+                Position endingPosition = new Position( ( EnPassantSquareRow + 1 ), EnPassantSquareColumn );
+                Pawn pawnThatMoved = new Pawn( "pawn", "black", endingPosition.Row, endingPosition.Column );
+                Turn lastTurn = new Turn( pawnThatMoved, startingPosition, endingPosition );
+                return lastTurn;
+            }
+            else
+            {
+                Position startingPosition = new Position( ( EnPassantSquareRow + 1 ), EnPassantSquareColumn );
+                Position endingPosition = new Position( ( EnPassantSquareRow - 1 ), EnPassantSquareColumn );
+                Pawn pawnThatMoved = new Pawn( "pawn", "white", endingPosition.Row, endingPosition.Column );
+                Turn lastTurn = new Turn( pawnThatMoved, startingPosition, endingPosition );
+                return lastTurn;
+            }
+
+        }
+
+        private int ConvertFenColumnLetterToRegularColumnNumber(string columnCharacter)
+        {
+            switch (columnCharacter)
+            {
+                case "a": return 0;
+                
+                case "b": return 1;
+
+                case "c": return 2;
+
+                case "d": return 3;
+
+                case "e": return 4;
+
+                case "f": return 5;
+
+                case "g": return 6;
+
+                case "h": return 7;
+            }
+            return -1;
+        }
+
+        private int ConvertFenRowNumberToRegularRowNumber(string rowCharacter)
+        {
+            int initalRowNumber = int.Parse(rowCharacter);
+            return (8 -  initalRowNumber);
+        }
+
+        public string GetCurrentTurnColor()
+        {
+            if(CurrentTurnColor == "w")
+            {
+                return "white";
+            }
+            else
+            {
+                return "black";
+            }
+        }
+
+        public int GetHalfMoveClock()
+        {
+            return int.Parse( HalfMoveClock );
+        }
+
+        public int GetFullMoveNumber()
+        {
+            return int.Parse( FullMoveNumber );
+        }
+
     }
 }
 

@@ -136,33 +136,30 @@ namespace ChessClassLibrary
         public void MovePiece( Board board, Position newPosition )
         {
 
-            int numberOfTurns = board.Turns.Count;
-            int nextTurn = numberOfTurns + 1;
-
             if(this.PieceIsAPawnMovingEnPassant( board, newPosition ))
             {
                 Position enPassantCapturePosition = FindEnPassantCapturePosition( newPosition );
                 Piece capturedPiece = board.WhatPieceIsHere( enPassantCapturePosition );
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                board.LastTurn = new ChessClassLibrary.Turn( this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column );
                 board.Capture( enPassantCapturePosition );
             }
 
             else if(this.PieceIsCapturingNormally( board, newPosition ))
             {
                 Piece capturedPiece = board.WhatPieceIsHere( newPosition );
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                board.LastTurn = new ChessClassLibrary.Turn( this, capturedPiece, Position.Row, Position.Column, newPosition.Row, newPosition.Column );
                 board.Capture( newPosition );
             }
 
             else if(this.PieceIsKingTryingToCastle( newPosition ))
             {
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true ) );
+                board.LastTurn = new ChessClassLibrary.Turn( this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true );
                 this.CastleRookMove( board, newPosition );
             }
 
             else //Piece Is Moving Normally Without Capturing
             {
-                board.Turns.Add( new ChessClassLibrary.Turn( nextTurn, this, Position.Row, Position.Column, newPosition.Row, newPosition.Column ) );
+                board.LastTurn = new ChessClassLibrary.Turn( this, Position.Row, Position.Column, newPosition.Row, newPosition.Column, true );
             }
 
             this.MoveSquare( board, newPosition );
@@ -319,6 +316,23 @@ namespace ChessClassLibrary
             {
                 this.OpponentColor = "white";
             }
+        }
+        public Piece( string name, string color, int row, int col, bool hasMoved )
+        {
+            Position position = new Position( row, col );
+            this.Position = position;
+            this.Color = color;
+            this.Name = name;
+            if(color == "white")
+            {
+                this.OpponentColor = "black";
+            }
+            else if(color == "black")
+            {
+                this.OpponentColor = "white";
+            }
+            this.HasMoved = hasMoved;
+
         }
     }
 }

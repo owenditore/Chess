@@ -43,6 +43,28 @@
                 
             </ListBox>
 
+            <ListBox Name="ListOfJoinableGames"
+                     SelectionChanged="ListOfJoinableGames_SelectionChanged"
+                     Width="300"
+                     Height="300"
+                     Background="LightGray"
+                     Visibility="Collapsed"
+                     Margin="150,268,150,32">
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+
+                            <TextBlock Text="{Binding GameID}">
+
+                            </TextBlock>
+
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+            </ListBox>
+
 
             <TextBlock x:Name="PlayLocalOrOnline"
                        Width="400"
@@ -75,6 +97,15 @@
                        Width="500"
                        FontSize="30"
                        Text="Select Who You Want To Play."
+                       TextAlignment="Center"
+                       Background="LightGray"
+                       Visibility="Collapsed"
+                       Margin="0,86,0,464"/>
+
+            <TextBlock x:Name="SelectGameToJoin"
+                       Width="500"
+                       FontSize="30"
+                       Text="Select Game To Join."
                        TextAlignment="Center"
                        Background="LightGray"
                        Visibility="Collapsed"

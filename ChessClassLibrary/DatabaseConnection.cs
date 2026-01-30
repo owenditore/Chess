@@ -12,6 +12,61 @@ namespace ChessClassLibrary
 
         string connectionString = "Server=tcp:owen-ditore-personal-projects.database.windows.net,1433;Initial Catalog=ChessPersonalProject;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
 
+        public string GetNewFenIfDifferent(int gameID, string oldFen)
+        {
+            string newFen = "";
+
+            using(SqlConnection connection = new SqlConnection( connectionString ))
+            {
+                connection.Open();
+
+                string query = $"SELECT * FROM Games WHERE GameID = {gameID};";
+
+                SqlCommand command = new SqlCommand( query, connection );
+
+                using(var reader = command.ExecuteReader())
+                {
+                    while(reader.Read())
+                    {
+                        newFen = reader.GetString(3);
+                    }
+                }
+
+            }
+
+            if(newFen == oldFen)
+                return null;
+
+            return newFen;
+        }
+        public List<GameLog> GetListOfJoinableGames( int userID )
+        {
+            List<GameLog> userInProgressGameLogs = new List<GameLog>();
+
+            using(SqlConnection connection = new SqlConnection( connectionString ))
+            {
+                connection.Open();
+
+                string query = $"SELECT * FROM Games WHERE WhitePlayerID = {userID} OR BlackPlayerID = {userID};";
+
+                SqlCommand command = new SqlCommand( query, connection );
+
+                using(var reader = command.ExecuteReader())
+                {
+                    while(reader.Read())
+                    {
+                        GameLog gameLog = new GameLog( reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetString(4));
+                        if( gameLog.StateOfGame == "In Progress")
+                        {
+                            userInProgressGameLogs.Add( gameLog );
+                        }
+                    }
+                }
+            }
+
+            return userInProgressGameLogs;
+        }
+
 
         public void EndTurnUpdateGame( int gameID, string fen, string stateOfGame )
         {

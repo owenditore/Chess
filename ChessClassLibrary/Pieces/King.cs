@@ -86,5 +86,9 @@ namespace ChessClassLibrary
         {
 
         }
+        public King( string name, string color, int row, int col, bool hasMoved ) : base( name, color, row, col, hasMoved )
+        {
+
+        }
     }
 }

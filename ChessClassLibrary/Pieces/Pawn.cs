@@ -15,6 +15,11 @@ namespace ChessClassLibrary
 
         }
 
+        public Pawn( string name, string color, int row, int col, bool hasMoved ) : base( name, color, row, col, hasMoved )
+        {
+
+        }
+
         //Methods
 
         public override bool NeedToPromote()
@@ -90,7 +95,7 @@ namespace ChessClassLibrary
             Position enPassantPieceToCaptureCurrentPosition = new Position( FindEnPassantCurrentRow( move ), move.EndingPosition.Column );
             Position enPassantPieceToCapturePriorPosition = new Position( FindEnPassantStartRow( enPassantPieceToCaptureCurrentPosition ), move.EndingPosition.Column );
 
-            Turn lastTurn = board.ReturnLastTurn( board );
+            Turn? lastTurn = board.LastTurn;
 
             if(lastTurn == null) return false;
 

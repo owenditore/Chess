@@ -13,6 +13,11 @@ namespace ChessClassLibrary
 
         }
 
+        public Rook( string name, string color, int row, int col, bool hasMoved ) : base( name, color, row, col, hasMoved )
+        {
+
+        }
+
         //Methods
 
         public override bool CheckValidMove( Board board, Position newPosition )

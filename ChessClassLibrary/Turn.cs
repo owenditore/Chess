@@ -19,20 +19,9 @@ namespace ChessClassLibrary
 
         public string Notation { get; set; }
 
-        public int Number {  get; set; } = 0;
-
 
         //Constructors
 
-        public Turn(int number, Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
-        {
-            this.Number = number;
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
-            this.Piece = movedPiece;
-            this.CapturedPiece = capturedPiece;
-            GenerateNotation();
-        }
         public Turn(Piece movedPiece, Piece capturedPiece, int startRow, int startColumn, int endRow, int endColumn)
         {
             this.StartingPosition = new Position(startRow, startColumn);
@@ -42,9 +31,8 @@ namespace ChessClassLibrary
             GenerateNotation();
         }
 
-        public Turn(int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn, bool castle)
+        public Turn(Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn, bool castle)
         {
-            this.Number = number;
             this.StartingPosition = new Position(startRow, startColumn);
             this.EndingPosition = new Position(endRow, endColumn);
             this.Piece = movedPiece;
@@ -52,19 +40,10 @@ namespace ChessClassLibrary
             GenerateNotation();
         }
 
-        public Turn( int number, Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
-        {
-            this.Number = number;
-            this.StartingPosition = new Position( startRow, startColumn );
-            this.EndingPosition = new Position( endRow, endColumn );
-            this.Piece = movedPiece;
-            GenerateNotation();
-        }
-
         public Turn(Piece movedPiece, int startRow, int startColumn, int endRow, int endColumn)
         {
-            this.StartingPosition = new Position(startRow, startColumn);
-            this.EndingPosition = new Position(endRow, endColumn);
+            this.StartingPosition = new Position( startRow, startColumn );
+            this.EndingPosition = new Position( endRow, endColumn );
             this.Piece = movedPiece;
             GenerateNotation();
         }
