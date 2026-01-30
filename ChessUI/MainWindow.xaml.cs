@@ -162,6 +162,11 @@ namespace ChessUI
             board.UpdateGameFromFEN( selectedGameLog.FEN );
 
             this.DrawBoard();
+
+            if(board.CurrentTurnColor !=  playerColor)
+            {
+                CheckForNewOnlineMove();
+            }
         }
 
         private void HideJoinGamesList()
@@ -413,7 +418,7 @@ namespace ChessUI
             }
         }
 
-        private async Task EndTurn()
+        private void EndTurn()
         {
             this.DrawBoard();
             board.NextTurn();
@@ -433,23 +438,23 @@ namespace ChessUI
             if(gameID != 0)
             {
                 databaseConnection.EndTurnUpdateGame( gameID, fen, stateOfGame );
-                await CheckForNewOnlineMove();
+                CheckForNewOnlineMove();
+                
             }
         }
 
         private async Task CheckForNewOnlineMove()
         {
-            CancellationToken cancelToken = cancelTokenSource.Token;
-            using var timer = new PeriodicTimer( TimeSpan.FromSeconds( 1 ) );
+            using var timer = new PeriodicTimer( TimeSpan.FromSeconds( 5 ) );
 
-            while(await timer.WaitForNextTickAsync(cancelToken))
+            while(await timer.WaitForNextTickAsync())
             {
                 string newFen = databaseConnection.GetNewFenIfDifferent( gameID, fen );
                 if(newFen != null)
                 {
                     board.UpdateGameFromFEN( newFen );
                     this.DrawBoard();
-                    cancelTokenSource.Cancel();
+                    break;
                 }
             }
         }
@@ -526,8 +531,6 @@ namespace ChessUI
 
         private readonly System.Windows.Controls.Image[,] pieceImages = new System.Windows.Controls.Image[8, 8];
         private readonly System.Windows.Controls.Image[,] highlights = new System.Windows.Controls.Image[8, 8];
-
-        static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
         List<GameLog> joinableGames;
         string fen;
