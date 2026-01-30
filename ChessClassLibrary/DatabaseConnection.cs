@@ -10,8 +10,8 @@ namespace ChessClassLibrary
     public class DatabaseConnection
     {
 
-        string connectionString = "Server=tcp:owen-ditore-personal-projects.database.windows.net,1433;Initial Catalog=ChessPersonalProject;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
-
+        //string connectionString = "Server=tcp:owen-ditore-personal-projects.database.windows.net,1433;Initial Catalog=ChessPersonalProject;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=\"Active Directory Default\";";
+        string connectionString = "Data Source=owen-ditore-personal-projects.database.windows.net;Initial Catalog=ChessPersonalProject;Persist Security Info=False;User ID=ChessLogin;Password=chess2026!;Pooling=False;MultipleActiveResultSets=False;Encrypt=Strict;TrustServerCertificate=False;Application Name=\"Microsoft SQL Server Data Tools, SQL Server Object Explorer\";Command Timeout=0";
         public string GetNewFenIfDifferent(int gameID, string oldFen)
         {
             string newFen = "";

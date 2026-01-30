@@ -454,6 +454,7 @@ namespace ChessUI
                 {
                     board.UpdateGameFromFEN( newFen );
                     this.DrawBoard();
+                    this.CheckForEndOfGame();
                     break;
                 }
             }
